@@ -21,10 +21,11 @@ import com.jme3.scene.shape.Box
 import com.jme3.scene.shape.Cylinder
 import com.jme3.scene.shape.Sphere
 import com.jme3.system.AppSettings
+import com.jme3.scene.*;
 
 class BasicTest extends SimpleApplication {
 	
-	static final Float Z_THICKNESS=0.1f
+	static final Float Z_THICKNESS=0.5f
 	/* 
 byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 	 */
@@ -59,33 +60,34 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 
 	void createWorld(Dyn4JAppState dyn4JAppState) {
 		createFloor(dyn4JAppState);
-		(1..10).each {
+		createRightWall(dyn4JAppState)
+		createLeftWall(dyn4JAppState)
+		(1..30).each {
 			createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(Math.random()*15)), dyn4JAppState)
 			createCircle(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
-			//createCylynder(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
+			createCylynder(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
 		}
 	}
 	
 	private createCylynder(Vector2f location, Dyn4JAppState dyn4JAppState) {
-		
-		Cylinder c = new Cylinder(20, 50, 1f, 2f, true, true)
-		
-		Geometry cylGeom = new Geometry("Cylinder", c)
-		
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 		mat.setColor("Color", ColorRGBA.Cyan)
+		
+		Geometry cylGeom = new Geometry("Cylinder", new Cylinder(20, 50, 0.3f, 2f))
 		cylGeom.setMaterial(mat)
-		
-		cylGeom.setLocalTranslation(location.x, location.y, 0f)
-		
 		Quaternion roll = new Quaternion()
-		roll.fromAngleAxis(new Float(FastMath.PI/4), Vector3f.UNIT_Z );
+		roll.fromAngleAxis(new Float(FastMath.PI/2), Vector3f.UNIT_X );
 		cylGeom.setLocalRotation(roll)
 		
-		rootNode.attachChild(cylGeom)
-		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Capsule(1f, 2f), MassType.NORMAL)
-		cylGeom.addControl(physics)
-		dyn4JAppState.add(cylGeom)
+		Node capsuleNode = new Node()
+		capsuleNode.attachChild(cylGeom)
+		capsuleNode.setLocalTranslation(location.x, location.y, 0f)
+		
+		rootNode.attachChild(capsuleNode)
+		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Capsule(0.3, 2), MassType.NORMAL)
+		physics.setDesity(1000)
+		capsuleNode.addControl(physics)
+		dyn4JAppState.add(capsuleNode)
 	}
 	
 	private createCircle(Vector2f location, Dyn4JAppState dyn4JAppState) {
@@ -99,15 +101,17 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 		boxGeom.setMaterial(mat)
 		rootNode.attachChild(boxGeom)
 		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Circle(radius), MassType.NORMAL)
-		physics.setRestitution(0.1f)
+		physics.setRestitution(0.8f)
 		physics.setDesity(8)
 		boxGeom.addControl(physics)
 		dyn4JAppState.add(boxGeom)
 	}
 	
 
+	Double cageSize = 10
+	
 	private createFloor(Dyn4JAppState dyn4JAppState) {
-		Double width = 150
+		Double width = cageSize
 		Double thickness = 0.3
 		Box b = new Box(new Float(width), new Float(thickness), Z_THICKNESS)
 		Geometry floorGeom = new Geometry("Box", b)
@@ -118,12 +122,47 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 		rootNode.attachChild(floorGeom)
 		
 		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(width*2, thickness*2), MassType.INFINITE)
-		physics.setRestitution(0.7f)
-		physics.setDesity(5)
 		floorGeom.addControl(physics)
 
 		dyn4JAppState.add(floorGeom)
 	}
+	
+	
+	private createRightWall(Dyn4JAppState dyn4JAppState) {
+		Double width = cageSize
+		Double thickness = 0.3
+		Box b = new Box(new Float(thickness), new Float(width), Z_THICKNESS)
+		Geometry floorGeom = new Geometry("Box", b)
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
+		mat.setColor("Color", ColorRGBA.Green)
+		floorGeom.setMaterial(mat)
+		floorGeom.setLocalTranslation(new Float(width), 2f, 0f)
+		rootNode.attachChild(floorGeom)
+		
+		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(thickness*2, width*2), MassType.INFINITE)
+		floorGeom.addControl(physics)
+
+		dyn4JAppState.add(floorGeom)
+	}
+	
+	private createLeftWall(Dyn4JAppState dyn4JAppState) {
+		Double width = cageSize
+		Double thickness = 0.3
+		Box b = new Box(new Float(thickness), new Float(width), Z_THICKNESS)
+		Geometry floorGeom = new Geometry("Box", b)
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
+		mat.setColor("Color", ColorRGBA.Green)
+		floorGeom.setMaterial(mat)
+		floorGeom.setLocalTranslation(new Float(-width), 2f, 0f)
+		rootNode.attachChild(floorGeom)
+		
+		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(thickness*2, width*2), MassType.INFINITE)
+		floorGeom.addControl(physics)
+
+		dyn4JAppState.add(floorGeom)
+	}
+	
+	
 
 	private createBox(Vector2f location, Dyn4JAppState dyn4JAppState) {
 		Double boxSize = 0.5f;
@@ -135,8 +174,10 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 		boxGeom.setLocalTranslation(location.x, location.y, 0f)
 		boxGeom.setMaterial(mat)
 		rootNode.attachChild(boxGeom)
-
-		boxGeom.addControl(new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL))
+		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL)
+		physics.setRestitution(0.1)
+		physics.setDesity(4)
+		boxGeom.addControl(physics)
 		dyn4JAppState.add(boxGeom)
 	}
 }

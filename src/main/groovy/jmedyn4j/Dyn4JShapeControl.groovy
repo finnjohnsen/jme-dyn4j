@@ -34,6 +34,7 @@ class Dyn4JShapeControl implements Control {
 		//fixture.setDensity(10)
 		body.addFixture(fixture)
 		body.setMass(massType)
+		body.setAutoSleepingEnabled(true)
 	}
 	
 	// more = more bouncy
@@ -61,6 +62,7 @@ class Dyn4JShapeControl implements Control {
 	}
 
 	private Double lastAngle=-1
+	private Transform lastTransform = new Transform()
 	
 	private final static Float negligibleAngleRotation = 0.001f
 	protected void updateFromAppState() {
@@ -71,23 +73,22 @@ class Dyn4JShapeControl implements Control {
 		
 		
 		Transform transform = body.getTransform()
-		//log.info "new box ${transform.x} ${transform.y}"
-		this.spatial.setLocalTranslation(
-			new Vector3f(
-				new Float(transform.getTranslation().x),
-				new Float(transform.getTranslation().y),
-					0f))
-		
-		
-		
-		
+		if (transform.getTranslation().x == lastTransform.getTranslation().x && 
+			transform.getTranslation().y == lastTransform.getTranslation().y) {
+			this.spatial.setLocalTranslation(
+				new Vector3f(
+					new Float(transform.getTranslation().x),
+					new Float(transform.getTranslation().y),
+						0f))
+			lastTransform=transform
+		}
 		Double angle = body.getTransform().getRotation()
-		if (Math.abs(angle-lastAngle) > negligibleAngleRotation) {
+		if (angle != lastAngle) {
 			Quaternion roll = new Quaternion()
 			roll.fromAngleAxis( new Float(angle) , Vector3f.UNIT_Z);
 			this.spatial.setLocalRotation(roll)
 			lastAngle = angle
-		}
+		} 
 	}
 	
 	@Override
