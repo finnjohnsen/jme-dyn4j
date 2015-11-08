@@ -55,6 +55,10 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 
 	void createWorld(Dyn4JAppState dyn4JAppState) {
 		createFloor(dyn4JAppState);
+		(1..10).each {
+			createBox(new Vector2f(0.6f, new Float(Math.random()*15)), dyn4JAppState)
+			createCircle(new Vector2f(1.1f, new Float(Math.random()*15)), dyn4JAppState)
+		}
 		createBox(new Vector2f(0.6f, 2f), dyn4JAppState)
 		createBox(new Vector2f(0f, 4f), dyn4JAppState)
 		createBox(new Vector2f(0.3f, 6f), dyn4JAppState)
@@ -95,7 +99,8 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 	}
 
 	private createBox(Vector2f location, Dyn4JAppState dyn4JAppState) {
-		Box b = new Box(0.5f, 0.5f, Z_THICKNESS)
+		Double boxSize = 0.5f;
+		Box b = new Box(new Float(boxSize), new Float(boxSize), Z_THICKNESS)
 		Geometry boxGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 		mat.setColor("Color", ColorRGBA.Blue)
@@ -104,7 +109,7 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 		boxGeom.setMaterial(mat)
 		rootNode.attachChild(boxGeom)
 
-		boxGeom.addControl(new Dyn4JShapeControl(new Rectangle(1.0, 1.0), MassType.NORMAL))
+		boxGeom.addControl(new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL))
 		dyn4JAppState.add(boxGeom)
 	}
 }
