@@ -27,7 +27,7 @@ class BasicTest extends SimpleApplication {
 	
 	static final Float Z_THICKNESS=0.5f
 	/* 
-byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
+byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 	 */
 	public static void main(String... args) {
 		BasicTest main = new BasicTest()
@@ -37,6 +37,7 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 		AppSettings settings = new AppSettings(true)
 		settings.setResolution(300, 300)
 		settings.setVSync(true)
+		settings.setTitle("JME-DYN4J-TEST")
 		main.setSettings(settings)
 		main.start()
 	}
@@ -48,7 +49,7 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 	public void simpleInitApp() {
 		
 		inputManager.setCursorVisible(true)
-		//flyCam.setEnabled(false);
+		flyCam.setEnabled(false);
 		flyCam.setMoveSpeed(15f)
 		
 		dyn4JAppState = new Dyn4JAppState()
@@ -56,16 +57,24 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 		
 		createWorld(dyn4JAppState)
 		cam.setLocation(new Vector3f(0f, 0f, 35f));
+		
+		
+		new Timer().schedule({
+			/*
+			 byzanz-record --duration=5 --x=0 --y=20 --width=320 --height=320 ~/Desktop/test.gif
+				  */
+			"sh /home/finn/src/jme-dyn4j/etc/mv-srv.sh".execute()
+		} as TimerTask, 100)
 	}
 
 	void createWorld(Dyn4JAppState dyn4JAppState) {
 		createFloor(dyn4JAppState);
 		createRightWall(dyn4JAppState)
 		createLeftWall(dyn4JAppState)
-		(1..30).each {
-			createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(Math.random()*15)), dyn4JAppState)
-			createCircle(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
-			createCylynder(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
+		(1..20).each {
+			createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(Math.random()*25)), dyn4JAppState)
+			createCircle(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*25)), dyn4JAppState)
+			createCylynder(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*25)), dyn4JAppState)
 		}
 	}
 	
