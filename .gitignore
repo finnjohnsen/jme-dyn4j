@@ -7,3 +7,5 @@ bin
 .gradle/2.8/taskArtifacts/*
 .gradle/2.8/taskArtifacts
 .gradle
+*.log
+build
