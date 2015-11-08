@@ -61,9 +61,9 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 		
 		new Timer().schedule({
 			/*
-			 byzanz-record --duration=5 --x=0 --y=20 --width=320 --height=320 ~/Desktop/test.gif
+			 byzanz-record --duration=6 --x=0 --y=30 --width=320 --height=340 /home/finn/src/jme-dyn4j/etc/jme-dyn4j.gif
 				  */
-			"sh /home/finn/src/jme-dyn4j/etc/mv-srv.sh".execute()
+			//"sh /home/finn/src/jme-dyn4j/etc/mv-srv.sh".execute()
 		} as TimerTask, 100)
 	}
 
