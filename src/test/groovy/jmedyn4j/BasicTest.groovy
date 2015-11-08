@@ -59,10 +59,10 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 
 	void createWorld(Dyn4JAppState dyn4JAppState) {
 		createFloor(dyn4JAppState);
-		(1..1).each {
-			//createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(Math.random()*15)), dyn4JAppState)
-			//createCircle(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
-			createCylynder(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
+		(1..10).each {
+			createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(Math.random()*15)), dyn4JAppState)
+			createCircle(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
+			//createCylynder(new Vector2f(new Float( (Math.random()*15)-7 ), new Float(Math.random()*15)), dyn4JAppState)
 		}
 	}
 	
@@ -89,7 +89,7 @@ byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
 	}
 	
 	private createCircle(Vector2f location, Dyn4JAppState dyn4JAppState) {
-		Double radius = 1
+		Double radius = 0.5
 		Sphere b = new Sphere(5, 30, new Float(radius))
 		Geometry boxGeom = new Geometry("Sphere", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
