@@ -27,7 +27,7 @@ Has a Control - Dyn4JShapeControl, tries to be like the bullett controls (RigidB
 ```
 
 ##Current state.
-Got solid item working (floor) and a couple of squares and circles bouncing on it. 
+Got solid item working (floor) and a couple of squares and circles bouncing on it. The controller is leaky and forcing you to use dyn4j classes. Needs to test on complex collision boxes. Needs a character control, not sure if that exists.
 
 Check BasicTest.groovy in src/test/groovy :
 
