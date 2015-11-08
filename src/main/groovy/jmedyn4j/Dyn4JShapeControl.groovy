@@ -85,7 +85,6 @@ class Dyn4JShapeControl implements Control {
 		if (Math.abs(angle-lastAngle) > negligibleAngleRotation) {
 			Quaternion roll = new Quaternion()
 			roll.fromAngleAxis( new Float(angle) , Vector3f.UNIT_Z);
-			roll.fromAngleAxis(new Float(FastMath.PI/2), Vector3f.UNIT_X );
 			this.spatial.setLocalRotation(roll)
 			lastAngle = angle
 		}
