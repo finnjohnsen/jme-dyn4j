@@ -10,23 +10,14 @@
     }
   }
   
-  def jmonkeyengine_version = '3.0.10'
+  def jmonkeyengine_version = '3.1.0-SNAPSHOT'
   dependencies {
       compile 'org.codehaus.groovy:groovy-all:2.4.3'
 	  compile 'org.dyn4j:dyn4j:3.2.0'
 	  
       compile "com.jme3:jme3-core:$jmonkeyengine_version"
-      compile "com.jme3:jme3-effects:$jmonkeyengine_version"
-      compile "com.jme3:jme3-networking:$jmonkeyengine_version"
-      compile "com.jme3:jme3-plugins:$jmonkeyengine_version"
-      compile "com.jme3:jme3-jogg:$jmonkeyengine_version"
-      compile "com.jme3:jme3-terrain:$jmonkeyengine_version"
-      compile "com.jme3:jme3-blender:$jmonkeyengine_version"
-      compile "com.jme3:jme3-jbullet:$jmonkeyengine_version"
-      compile "com.jme3:jme3-niftygui:$jmonkeyengine_version"
-      compile "com.jme3:jme3-desktop:$jmonkeyengine_version"
-      compile "com.jme3:jme3-lwjgl:$jmonkeyengine_version"
+      testCompile "com.jme3:jme3-jogg:$jmonkeyengine_version"
+      testCompile "com.jme3:jme3-desktop:$jmonkeyengine_version"
+      testCompile "com.jme3:jme3-lwjgl:$jmonkeyengine_version"
       testCompile "junit:junit:4.12"
-	  testCompile 'org.slf4j:slf4j-api:1.7.7'
-	  testCompile "ch.qos.logback:logback-classic:1.1.3"
   }

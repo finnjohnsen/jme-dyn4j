@@ -3,3 +3,7 @@
 .settings
 bin
 *.so
+.gradle/2.8/taskArtifacts/*
+.gradle/2.8/taskArtifacts/*
+.gradle/2.8/taskArtifacts
+.gradle
