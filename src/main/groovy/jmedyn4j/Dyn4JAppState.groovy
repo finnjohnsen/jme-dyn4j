@@ -17,7 +17,6 @@ class Dyn4JAppState extends AbstractAppState {
 	private Set<Spatial> spatials = new HashSet<Spatial>();
 	
 	void add(Spatial spatial) {
-		println "add"
 		if (world == null) world = new World()
 		if (spatial.getControl(Dyn4JShapeControl.class) == null) throw new IllegalArgumentException("Cannot handle a node which isnt a ${Dyn4JShapeControl.getClass().getSimpleName()}")
 		synchronized(spatials) {
@@ -40,7 +39,6 @@ class Dyn4JAppState extends AbstractAppState {
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
-		println "world update"
 		world.update(tpf)
 		synchronized(spatials) {
 			spatials.asList().each { Spatial spatial ->
@@ -52,14 +50,10 @@ class Dyn4JAppState extends AbstractAppState {
 		}
 	}
 
-	
-	
-
-
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 	  super.initialize(stateManager, app);
 	  
 	}
-
 }
+

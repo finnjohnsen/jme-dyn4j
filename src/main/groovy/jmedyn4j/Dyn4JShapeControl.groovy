@@ -43,7 +43,6 @@ class Dyn4JShapeControl implements Control {
 
 	protected void updateFromAppState() {
 		Vector2 vector2 = body.getTransform().getTranslation()
-		println "updateFromAppState: $vector2"
 		this.spatial.setLocalTranslation(
 			new Float(vector2.x), 
 			new Float(vector2.y), 0f)
@@ -81,11 +80,7 @@ class Dyn4JShapeControl implements Control {
 	public Control cloneForSpatial(Spatial spatial) {
 		return null;
 	}
-
-
-
 	@Override
 	public void render(RenderManager rm, ViewPort vp) {
 	}
-
 }
