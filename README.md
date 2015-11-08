@@ -15,7 +15,7 @@ Has a AppState - Dyn4JAppState, trying to be like BullettAppState
 
 Has a Control - Dyn4JShapeControl, tries to be like the bullett controls (RigidBody etc)
 ```groovy
-		Box b = new Box(new Float(width), new Float(thickness), 0.)
+		Box b = new Box(new Float(width), new Float(thickness), 0.1f)
 		Geometry floorGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 		mat.setColor("Color", ColorRGBA.Green)
@@ -27,7 +27,9 @@ Has a Control - Dyn4JShapeControl, tries to be like the bullett controls (RigidB
 ```
 
 ##Current state.
-Got solid item working (floor) and a couple of squares and circles bouncing on it. Run BasicTest.groovy in src/test/groovy
+Got solid item working (floor) and a couple of squares and circles bouncing on it. 
+
+Check BasicTest.groovy in src/test/groovy :
 
 ![screenshot](etc/jme-dyn4j.gif)
 
