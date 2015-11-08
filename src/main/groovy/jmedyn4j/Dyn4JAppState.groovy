@@ -1,6 +1,7 @@
 package jmedyn4j
 
 import com.jme3.app.Application;
+import com.jme3.app.state.AbstractAppState
 import com.jme3.app.state.AppState
 import com.jme3.app.state.AppStateManager;
 import com.jme3.renderer.RenderManager;
@@ -11,78 +12,54 @@ import javax.sql.rowset.spi.SyncResolver;
 
 import org.dyn4j.dynamics.World
 
-class Dyn4JAppState implements AppState {
-
-	Boolean initialized = false
-	Boolean enabled = false
-	Boolean attached = false
+class Dyn4JAppState extends AbstractAppState {
+	private World world
+	private Set<Spatial> spatials = new HashSet<Spatial>();
 	
-	World world
-	
-	private Set<Node> nodes = new HashSet<Node>();
-	
-	
-	void addNode(Node node) {
-		if (node.getControl(Dyn4JShapeControl.class) == null) throw new IllegalArgumentException("Cannot handle a node which isnt a ${Dyn4JShapeControl.getClass().getSimpleName()}")
-		synchronized(nodes) {
-			 nodes.add(node)
+	void add(Spatial spatial) {
+		println "add"
+		if (world == null) world = new World()
+		if (spatial.getControl(Dyn4JShapeControl.class) == null) throw new IllegalArgumentException("Cannot handle a node which isnt a ${Dyn4JShapeControl.getClass().getSimpleName()}")
+		synchronized(spatials) {
+			 spatials.add(spatial)
+			 Dyn4JShapeControl ctl = spatial.getControl(Dyn4JShapeControl.class)
+			 world.addBody(ctl.body)
 		}
 	}
 	
 	@Override
+	public void stateAttached(AppStateManager stateManager) {
+		super.stateAttached(stateManager)
+	}
+
+	@Override
+	public void stateDetached(AppStateManager stateManager) {
+		super.stateDetached(stateManager);
+	}
+	
+	@Override
 	public void update(float tpf) {
-		if (initialized && enabled && attached && world) world.update(tpf)
+		super.update(tpf)
+		println "world update"
 		world.update(tpf)
-		synchronized(nodes) {
-			nodes.asList().each { Node n ->
-				Dyn4JShapeControl ctl = n.getControl(Dyn4JShapeControl.class)
-				if (ctl != null) { nodes.remove(n); return; } //evict nodes which have their Dyn4JShapeControl removed
+		synchronized(spatials) {
+			spatials.asList().each { Spatial spatial ->
+				Dyn4JShapeControl ctl = spatial.getControl(Dyn4JShapeControl.class)
+				if (ctl == null) { spatials.remove(spatial); return; } //evict nodes which have their Dyn4JShapeControl removed
+				
 				ctl.updateFromAppState()
 			}
 		}
 	}
 
+	
+	
+
+
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
-		world = new World()
-		initialized = true
-	}
-	
-	@Override
-	public void render(RenderManager rm) {
+	  super.initialize(stateManager, app);
+	  
 	}
 
-	@Override
-	public void postRender() {
-	}
-
-	@Override
-	public void cleanup() {
-		//world = null
-	}
-	
-	@Override
-	public void stateAttached(AppStateManager stateManager) {
-		attached = true
-	}
-
-	@Override
-	public void stateDetached(AppStateManager stateManager) {
-		attached = false
-	}
-	
-	@Override
-	public boolean isInitialized() {
-		return initialized;
-	}
-
-	@Override
-	public void setEnabled(boolean active) {
-		enabled = active
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return enabled;
-	}
 }

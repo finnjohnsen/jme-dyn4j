@@ -1,5 +1,7 @@
 package jmedyn4j
 
+import javax.vecmath.Vector2f;
+
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
 import org.dyn4j.dynamics.World
@@ -18,7 +20,7 @@ import com.jme3.system.AppSettings
 class BasicTest extends SimpleApplication {
 	
 	public static void main(String... args) {
-		BasicDyn4JTest main = new BasicDyn4JTest()
+		BasicTest main = new BasicTest()
 		main.setDisplayFps(false)
 		main.setDisplayStatView(false)
 		main.setShowSettings(false)
@@ -48,7 +50,8 @@ class BasicTest extends SimpleApplication {
 
 	void createWorld(Dyn4JAppState dyn4JAppState) {
 		createFloor(dyn4JAppState);
-		createBox(dyn4JAppState)
+		createBox(new Vector2f(0.6f, 2f), dyn4JAppState)
+		createBox(new Vector2f(0f, 4f), dyn4JAppState)
 	}
 
 	private createFloor(Dyn4JAppState dyn4JAppState) {
@@ -60,19 +63,21 @@ class BasicTest extends SimpleApplication {
 		floorGeom.move(0f, -8f, 0f)
 		rootNode.attachChild(floorGeom)
 		floorGeom.addControl(new Dyn4JShapeControl(new Rectangle(10.0, 0.1), MassType.INFINITE))
-		
-		dyn4JAppState.addNode(floorGeom)
+
+		dyn4JAppState.add(floorGeom)
 	}
 
-	private createBox() {
+	private createBox(Vector2f location, Dyn4JAppState dyn4JAppState) {
 		Box b = new Box(0.5f, 0.5f, 0.5f)
 		Geometry boxGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 		mat.setColor("Color", ColorRGBA.Blue)
-		boxGeom.setLocalTranslation(0f, 2f, 0f)
+
+		boxGeom.setLocalTranslation(location.x, location.y, 0f)
 		boxGeom.setMaterial(mat)
 		rootNode.attachChild(boxGeom)
 
 		boxGeom.addControl(new Dyn4JShapeControl(new Rectangle(1.0, 1.0), MassType.NORMAL))
+		dyn4JAppState.add(boxGeom)
 	}
 }
