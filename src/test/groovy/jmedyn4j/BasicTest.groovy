@@ -22,14 +22,16 @@ import com.jme3.system.AppSettings
 class BasicTest extends SimpleApplication {
 	
 	static final Float Z_THICKNESS=0.1f
-	
+	/* 
+byzanz-record --duration=1 --x=2080 --y=560 --width=320 --height=350 test.gif
+	 */
 	public static void main(String... args) {
 		BasicTest main = new BasicTest()
-		main.setDisplayFps(false)
+		//main.setDisplayFps(false)
 		main.setDisplayStatView(false)
 		main.setShowSettings(false)
 		AppSettings settings = new AppSettings(true)
-		settings.setResolution(1024, 768)
+		settings.setResolution(300, 300)
 		settings.setVSync(true)
 		main.setSettings(settings)
 		main.start()
