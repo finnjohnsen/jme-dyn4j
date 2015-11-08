@@ -10,6 +10,7 @@ import com.jme3.scene.Spatial;
 
 import javax.sql.rowset.spi.SyncResolver;
 
+import org.dyn4j.dynamics.Settings
 import org.dyn4j.dynamics.World
 
 class Dyn4JAppState extends AbstractAppState {

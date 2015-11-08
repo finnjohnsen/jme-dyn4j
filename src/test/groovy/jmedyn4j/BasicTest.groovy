@@ -5,6 +5,7 @@ import javax.vecmath.Vector2f;
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
 import org.dyn4j.dynamics.World
+import org.dyn4j.geometry.Circle
 import org.dyn4j.geometry.MassType
 import org.dyn4j.geometry.Rectangle
 import org.dyn4j.geometry.Transform
@@ -15,9 +16,12 @@ import com.jme3.math.ColorRGBA
 import com.jme3.math.Vector3f
 import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
+import com.jme3.scene.shape.Sphere
 import com.jme3.system.AppSettings
 
 class BasicTest extends SimpleApplication {
+	
+	static final Float Z_THICKNESS=0.1f
 	
 	public static void main(String... args) {
 		BasicTest main = new BasicTest()
@@ -54,23 +58,43 @@ class BasicTest extends SimpleApplication {
 		createBox(new Vector2f(0f, 4f), dyn4JAppState)
 		createBox(new Vector2f(0.3f, 6f), dyn4JAppState)
 		createBox(new Vector2f(0.2f, 8f), dyn4JAppState)
+		createCircle(new Vector2f(1.1f, 8f), dyn4JAppState)
 	}
+	
+	private createCircle(Vector2f location, Dyn4JAppState dyn4JAppState) {
+		Double radius = 1
+		Sphere b = new Sphere(5, 30, new Float(radius))
+		Geometry boxGeom = new Geometry("Sphere", b)
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
+		mat.setColor("Color", ColorRGBA.Blue)
+
+		boxGeom.setLocalTranslation(location.x, location.y, 0f)
+		boxGeom.setMaterial(mat)
+		rootNode.attachChild(boxGeom)
+		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Circle(radius), MassType.NORMAL)
+		physics.setRestitution(0.5f)
+		boxGeom.addControl(physics)
+		dyn4JAppState.add(boxGeom)
+	}
+	
 
 	private createFloor(Dyn4JAppState dyn4JAppState) {
-		Box b = new Box(10, 0.1, 1)
+		Double width = 150
+		Double thickness = 0.1
+		Box b = new Box(new Float(width), new Float(thickness), Z_THICKNESS)
 		Geometry floorGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 		mat.setColor("Color", ColorRGBA.Green)
 		floorGeom.setMaterial(mat)
-		floorGeom.move(0f, -8f, 0f)
+		floorGeom.setLocalTranslation(0f, -8f, 0f)
 		rootNode.attachChild(floorGeom)
-		floorGeom.addControl(new Dyn4JShapeControl(new Rectangle(10.0, 0.1), MassType.INFINITE))
+		floorGeom.addControl(new Dyn4JShapeControl(new Rectangle(width*2, thickness*2), MassType.INFINITE))
 
 		dyn4JAppState.add(floorGeom)
 	}
 
 	private createBox(Vector2f location, Dyn4JAppState dyn4JAppState) {
-		Box b = new Box(0.5f, 0.5f, 0.5f)
+		Box b = new Box(0.5f, 0.5f, Z_THICKNESS)
 		Geometry boxGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 		mat.setColor("Color", ColorRGBA.Blue)

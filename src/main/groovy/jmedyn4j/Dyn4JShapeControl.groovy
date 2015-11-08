@@ -24,19 +24,38 @@ import com.sun.glass.ui.Application
 class Dyn4JShapeControl implements Control {
 	private Spatial spatial
 	protected Body body
-
+	BodyFixture fixture
 	// Leaky	
 	Dyn4JShapeControl(AbstractShape shape, MassType massType) {
 		body = new Body()
-		body.addFixture(new BodyFixture(shape))
+		fixture = new BodyFixture(shape)
+		//fixture.restitution=0.2
+		//fixture.friction=0.8
+		//fixture.setDensity(10)
+		body.addFixture(fixture)
 		body.setMass(massType)
 	}
 	
+	// more = more bouncy
+	void setRestitution(Double restitution) {
+		fixture.setRestitution(restitution)
+	}
+	// more = in kg/m
+	void setDesity(Double kg) {
+		fixture.setDensity(kg)
+	}
+	
+	// low = more slippery
+	void setFriction(Double friction) {
+		fixture.setFriction(friction)
+	}
+			
 	
 	@Override
 	public void setSpatial(Spatial spatial) {
 		this.spatial = spatial
 		body.translate(new Double(spatial.getLocalTranslation().x), new Double(spatial.getLocalTranslation().y))
+
 		//TODO: set initial rotation of the dyn4j-Body
 		
 	}
