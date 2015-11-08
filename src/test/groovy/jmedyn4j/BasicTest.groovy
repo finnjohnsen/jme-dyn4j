@@ -52,6 +52,8 @@ class BasicTest extends SimpleApplication {
 		createFloor(dyn4JAppState);
 		createBox(new Vector2f(0.6f, 2f), dyn4JAppState)
 		createBox(new Vector2f(0f, 4f), dyn4JAppState)
+		createBox(new Vector2f(0.3f, 6f), dyn4JAppState)
+		createBox(new Vector2f(0.2f, 8f), dyn4JAppState)
 	}
 
 	private createFloor(Dyn4JAppState dyn4JAppState) {

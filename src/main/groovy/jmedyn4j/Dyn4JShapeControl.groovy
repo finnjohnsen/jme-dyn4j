@@ -41,6 +41,10 @@ class Dyn4JShapeControl implements Control {
 		
 	}
 
+	private Float m00=0f
+	private Float m01=0f
+	
+	private final static Float negligibleRotation = 0.001f
 	protected void updateFromAppState() {
 		Vector2 vector2 = body.getTransform().getTranslation()
 		this.spatial.setLocalTranslation(
@@ -55,12 +59,19 @@ class Dyn4JShapeControl implements Control {
 				new Float(transform.getTranslation().x),
 				new Float(transform.getTranslation().y),
 					0f))
-		/*
-		Double r = body.getTransform().getRotation()
-		println "$r"
-		Quaternion roll = new Quaternion() 
-		roll.fromAngleAxis( new Float(r) ,  Vector3f.UNIT_X);
-		this.spatial.setLocalRotation(roll)*/
+		
+		Double[] rot = body.getTransform().getValues()
+		if ( Math.abs(rot[0] - m00) > negligibleRotation || Math.abs(rot[1] - m01) > negligibleRotation) {
+			Quaternion roll = new Quaternion()
+			roll.fromRotationMatrix(
+				new Float(rot[0]), new Float(rot[1]), 0f,
+				0f, 0f, 0f,
+				0f, 0f, 0f)
+			this.spatial.setLocalRotation(roll)
+			m00=rot[0]
+			m01=rot[1]
+		}
+
 	}
 	
 	@Override
