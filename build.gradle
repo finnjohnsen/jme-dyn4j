@@ -1,9 +1,9 @@
 apply plugin: 'groovy'
+apply plugin: "maven"
 
 sourceCompatibility = 1.8
-version = '0.1-SNAPSHOT'
+version = '0.1'
 group = 'jme-dyn4j'
-
 repositories {
 	mavenCentral()
 	jcenter()
@@ -20,4 +20,34 @@ dependencies {
 	testCompile "com.jme3:jme3-desktop:$jmonkeyengine_version"
 	testCompile "com.jme3:jme3-lwjgl:$jmonkeyengine_version"
 	testCompile "junit:junit:4.12"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.8'
+}
+
+//gradle uploadArchives
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			repository(id: "bintray-johnsen-maven-gradle-jme-dyn4j",url: "https://api.bintray.com/maven/johnsen/maven/jme-dyn4j") {
+				authentication(userName: project.properties["bintrayUser"], password: project.properties["bintrayApiKey"])
+			}
+		}
+	}
 }
