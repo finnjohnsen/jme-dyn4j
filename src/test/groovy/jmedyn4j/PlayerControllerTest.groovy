@@ -97,7 +97,7 @@ class PlayerControllerTest extends SimpleApplication {
 		capsuleNode.setLocalTranslation(location.x, location.y, 0f)
 		
 		rootNode.attachChild(capsuleNode)
-		playerControl = new Dyn4JPlayerControl(new Capsule(0.3, 2), MassType.NORMAL)
+		playerControl = new Dyn4JPlayerControl(0.3, 1.80, 90)
 		capsuleNode.addControl(playerControl)
 		dyn4JAppState.add(capsuleNode)
 	}
@@ -159,6 +159,8 @@ class PlayerControllerTest extends SimpleApplication {
 		rootNode.attachChild(floorGeom)
 
 		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(width*2, thickness*2), MassType.INFINITE, 1, 0)
+		physics.setRestitution(0)
+		physics.setFriction(0.8)
 		floorGeom.addControl(physics)
 
 		dyn4JAppState.add(floorGeom)
@@ -175,8 +177,9 @@ class PlayerControllerTest extends SimpleApplication {
 		boxGeom.setMaterial(mat)
 		rootNode.attachChild(boxGeom)
 		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL)
-		physics.setRestitution(0.3)
-		physics.setDesity(400)
+		physics.setRestitution(0)
+		physics.setFriction(1)
+		physics.setDesity(140)
 		boxGeom.addControl(physics)
 		dyn4JAppState.add(boxGeom)
 	}

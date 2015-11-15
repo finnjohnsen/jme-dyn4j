@@ -6,6 +6,7 @@ import org.dyn4j.dynamics.Force
 import org.dyn4j.dynamics.joint.Joint
 import org.dyn4j.dynamics.joint.MotorJoint
 import org.dyn4j.geometry.AbstractShape
+import org.dyn4j.geometry.Capsule
 import org.dyn4j.geometry.MassType
 import org.dyn4j.geometry.Transform
 import org.dyn4j.geometry.Vector2
@@ -27,15 +28,18 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	MotorJoint joint
 	BodyFixture bodyFixture
 	
-	Long density = 4
-	Dyn4JPlayerControl(AbstractShape shape, MassType massType) {
+	private Long weight = 80
+	Dyn4JPlayerControl(Double width=0.3, Double height=1.8, Long weight=80) {
+		this.weight=weight
+		AbstractShape shape = new Capsule(width, height)
+		
 		body = new Body()
 		bodyFixture = new BodyFixture(shape)
-		bodyFixture.setDensity(density);
-		bodyFixture.setFriction(1)
-		bodyFixture.setRestitution(0)
+		bodyFixture.setDensity(weight);
+		bodyFixture.setFriction(1) //no slipperiness
+		bodyFixture.setRestitution(0) //no bouncyness
 		body.addFixture(bodyFixture)
-		body.setMass(massType)
+		body.setMass(MassType.NORMAL)
 		
 		body.setAutoSleepingEnabled(false)
 		bodies.add(body)
@@ -43,9 +47,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		controller = new Body()
 		BodyFixture controllerFixture = new BodyFixture(shape)
 		controllerFixture.setSensor(true)
-		controllerFixture.setFriction(1)
-		controllerFixture.setRestitution(0)
-		controllerFixture.setDensity(density);
+		controllerFixture.setDensity(weight);
 		
 		controller.setMass(MassType.INFINITE)
 		
@@ -102,20 +104,22 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	void updateFromAppState() {
 		if (walkRight) {
 			if (body.getLinearVelocity().x < 0) body.setLinearVelocity(0, body.getLinearVelocity().y)
-			if (body.getLinearVelocity().x < 3) body.applyImpulse(new Vector2(2, 0));
+			if (body.getLinearVelocity().x < 3) body.applyImpulse(new Vector2(weight/2, 0));
 		} else if (walkLeft) {
 			if (body.getLinearVelocity().x > 0) body.setLinearVelocity(0, body.getLinearVelocity().y)
-			if (body.getLinearVelocity().x > -3) body.applyImpulse(new Vector2(-2, 0));
+			if (body.getLinearVelocity().x > -3) body.applyImpulse(new Vector2(-(weight/2), 0));
 		} else {
-			if (Math.abs(body.getLinearVelocity().x)>1.5) {
-				if (body.getLinearVelocity().x>0)body.setLinearVelocity(1.5, body.getLinearVelocity().y)
-				if (body.getLinearVelocity().x<0)body.setLinearVelocity(-1.5, body.getLinearVelocity().y)
+			if (Math.abs(body.getLinearVelocity().x)>(weight/4)) {
+				if (body.getLinearVelocity().x>0)body.setLinearVelocity(weight/4, body.getLinearVelocity().y)
+				if (body.getLinearVelocity().x<0)body.setLinearVelocity(-(weight/4), body.getLinearVelocity().y)
 			}
 		}
 		
 		if (jump) {
 			jump=false
-			body.applyImpulse(new Vector2(0, 8));
+			if (body.getInContactBodies(false).size() > 0) { //poor mans "is on ground" check.
+				body.applyImpulse(new Vector2(0, weight*3.0));
+			} 
 		}
 		
 		Vector2 vector2 = body.getTransform().getTranslation()
