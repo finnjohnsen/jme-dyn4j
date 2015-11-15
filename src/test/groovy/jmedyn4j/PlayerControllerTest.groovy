@@ -85,10 +85,13 @@ class PlayerControllerTest extends SimpleApplication {
 	
 	private initPlayer(Vector2f location, Dyn4JAppState dyn4JAppState) {
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.setColor("Color", ColorRGBA.Black)
+		mat.getAdditionalRenderState().setWireframe(true);
+		mat.getAdditionalRenderState().setWireframe(true);
+		mat.setColor("Color", ColorRGBA.Red)
 		
-		Geometry cylGeom = new Geometry("Cylinder", new Cylinder(20, 50, 0.3f, 2f))
+		Geometry cylGeom = new Geometry("Cylinder", new Cylinder(20, 50, 0.3f, 1.8f))
 		cylGeom.setMaterial(mat)
+		
 		Quaternion roll = new Quaternion()
 		roll.fromAngleAxis(new Float(FastMath.PI/2), Vector3f.UNIT_X );
 		cylGeom.setLocalRotation(roll)
@@ -134,12 +137,10 @@ class PlayerControllerTest extends SimpleApplication {
 			}
 		}
 	};
- 
-
 
 	void createWorld(Dyn4JAppState dyn4JAppState) {
 		createFloor(dyn4JAppState);
-		(1..4).each {
+		(1..40).each {
 			createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(-8)), dyn4JAppState)
 		}
 	}
@@ -154,16 +155,13 @@ class PlayerControllerTest extends SimpleApplication {
 		Box b = new Box(new Float(width), new Float(thickness), Z_THICKNESS)
 		Geometry floorGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
+		mat.getAdditionalRenderState().setWireframe(true)
 		mat.setColor("Color", new ColorRGBA(new Float(160/255f),new Float(82/255f),new Float(45/255f), 1f))
 		floorGeom.setMaterial(mat)
 		floorGeom.setLocalTranslation(0f, -8f, 0f)
 		rootNode.attachChild(floorGeom)
 
-		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(width*2, thickness*2), MassType.INFINITE, 1, 0)
-		physics.setRestitution(0)
-		physics.setFriction(0.8)
-		floorGeom.addControl(physics)
-
+		floorGeom.addControl(new Dyn4JShapeControl(new Rectangle(width*2, thickness*2), MassType.INFINITE, 0, 1))
 		dyn4JAppState.add(floorGeom)
 	}
 
@@ -172,15 +170,13 @@ class PlayerControllerTest extends SimpleApplication {
 		Box b = new Box(new Float(boxSize), new Float(boxSize), Z_THICKNESS)
 		Geometry boxGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
+		mat.getAdditionalRenderState().setWireframe(true);
 		mat.setColor("Color", new ColorRGBA(new Float(255/255f),new Float(228/255f),new Float(225/255f), 1f))
 
 		boxGeom.setLocalTranslation(location.x, location.y, 0f)
 		boxGeom.setMaterial(mat)
 		rootNode.attachChild(boxGeom)
-		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL)
-		physics.setRestitution(0)
-		physics.setFriction(1)
-		physics.setDesity(140)
+		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL, 100, 0.8, 0)
 		boxGeom.addControl(physics)
 		dyn4JAppState.add(boxGeom)
 	}

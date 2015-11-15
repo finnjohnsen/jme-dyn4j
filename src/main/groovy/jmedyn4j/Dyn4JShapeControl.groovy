@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
+import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AbstractShape
 import org.dyn4j.geometry.MassType
@@ -28,16 +29,27 @@ class Dyn4JShapeControl implements Control, IDyn4JControl {
 	private Spatial spatial
 	protected Body body
 	BodyFixture fixture
-	// Leaky	
-	Dyn4JShapeControl(AbstractShape shape, MassType massType, Double friction=BodyFixture.DEFAULT_FRICTION, Double restitution=BodyFixture.DEFAULT_RESTITUTION) {
+	
+	Dyn4JShapeControl(AbstractShape shape,
+		 massType,
+		 Double weight=null, //in kg/m
+		 Double friction=null, // low = more slippery
+		 Double restitution=null// more = more bouncy
+		 ) {
 		body = new Body()
 		fixture = new BodyFixture(shape)
-		fixture.setFriction(friction)
-		fixture.setRestitution(restitution)
+		if (friction) fixture.setFriction(friction)
+		if (restitution) fixture.setRestitution(restitution)
+		if (weight) fixture.setDensity(weight)
 		body.addFixture(fixture)
 		body.setMass(massType)
 		body.setAutoSleepingEnabled(true)
 	}
+		 
+	 @Override
+	 void addToWorld(World world) {
+		 world.addBody(body)
+	 }
 	
 	// more = more bouncy
 	void setRestitution(Double restitution) {
@@ -51,16 +63,6 @@ class Dyn4JShapeControl implements Control, IDyn4JControl {
 	// low = more slippery
 	void setFriction(Double friction) {
 		fixture.setFriction(friction)
-	}
-		
-	@Override
-	public List<Body> getBodies() {
-		return [body];
-	}
-
-	@Override
-	public List<Joint> getJoints() {
-		return [];
 	}
 	
 	@Override

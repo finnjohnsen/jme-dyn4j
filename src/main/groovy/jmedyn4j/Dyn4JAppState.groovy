@@ -23,13 +23,7 @@ class Dyn4JAppState extends AbstractAppState {
 		synchronized(spatials) {
 			 spatials.add(spatial)
 			 IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
-			 ctl.bodies.each {
-				 world.addBody(it)
-			 }
-			 ctl.joints.each {
-				 world.addJoint(it)
-			 }
-			 
+			 ctl.addToWorld(world)
 		}
 	}
 	
