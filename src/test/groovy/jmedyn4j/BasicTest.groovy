@@ -94,9 +94,28 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 		
 		rootNode.attachChild(capsuleNode)
 		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Capsule(0.3, 2), MassType.NORMAL)
-		physics.setDesity(1000)
+		physics.setRestitution(0.7f)
+		physics.setDesity(4)
+		//physics.setDesity(1000)
 		capsuleNode.addControl(physics)
 		dyn4JAppState.add(capsuleNode)
+	}
+	
+	private createBox(Vector2f location, Dyn4JAppState dyn4JAppState) {
+		Double boxSize = 0.5f;
+		Box b = new Box(new Float(boxSize), new Float(boxSize), Z_THICKNESS)
+		Geometry boxGeom = new Geometry("Box", b)
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
+		mat.setColor("Color", ColorRGBA.Brown)
+
+		boxGeom.setLocalTranslation(location.x, location.y, 0f)
+		boxGeom.setMaterial(mat)
+		rootNode.attachChild(boxGeom)
+		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL)
+		physics.setRestitution(0.5)
+		physics.setDesity(4)
+		boxGeom.addControl(physics)
+		dyn4JAppState.add(boxGeom)
 	}
 	
 	private createCircle(Vector2f location, Dyn4JAppState dyn4JAppState) {
@@ -111,7 +130,7 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 		rootNode.attachChild(boxGeom)
 		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Circle(radius), MassType.NORMAL)
 		physics.setRestitution(0.8f)
-		physics.setDesity(8)
+		physics.setDesity(4)
 		boxGeom.addControl(physics)
 		dyn4JAppState.add(boxGeom)
 	}
@@ -173,20 +192,5 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 	
 	
 
-	private createBox(Vector2f location, Dyn4JAppState dyn4JAppState) {
-		Double boxSize = 0.5f;
-		Box b = new Box(new Float(boxSize), new Float(boxSize), Z_THICKNESS)
-		Geometry boxGeom = new Geometry("Box", b)
-		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.setColor("Color", ColorRGBA.Brown)
 
-		boxGeom.setLocalTranslation(location.x, location.y, 0f)
-		boxGeom.setMaterial(mat)
-		rootNode.attachChild(boxGeom)
-		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL)
-		physics.setRestitution(0.1)
-		physics.setDesity(4)
-		boxGeom.addControl(physics)
-		dyn4JAppState.add(boxGeom)
-	}
 }

@@ -19,11 +19,17 @@ class Dyn4JAppState extends AbstractAppState {
 	
 	void add(Spatial spatial) {
 		if (world == null) world = new World()
-		if (spatial.getControl(Dyn4JShapeControl.class) == null) throw new IllegalArgumentException("Cannot handle a node which isnt a ${Dyn4JShapeControl.getClass().getSimpleName()}")
+		if (spatial.getControl(IDyn4JControl.class) == null) throw new IllegalArgumentException("Cannot handle a node which isnt a ${Dyn4JShapeControl.getClass().getSimpleName()}")
 		synchronized(spatials) {
 			 spatials.add(spatial)
-			 Dyn4JShapeControl ctl = spatial.getControl(Dyn4JShapeControl.class)
-			 world.addBody(ctl.body)
+			 IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
+			 ctl.bodies.each {
+				 world.addBody(it)
+			 }
+			 ctl.joints.each {
+				 world.addJoint(it)
+			 }
+			 
 		}
 	}
 	
@@ -43,7 +49,7 @@ class Dyn4JAppState extends AbstractAppState {
 		world.update(tpf)
 		synchronized(spatials) {
 			spatials.asList().each { Spatial spatial ->
-				Dyn4JShapeControl ctl = spatial.getControl(Dyn4JShapeControl.class)
+				IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
 				if (ctl == null) { spatials.remove(spatial); return; } //evict nodes which have their Dyn4JShapeControl removed
 				
 				ctl.updateFromAppState()

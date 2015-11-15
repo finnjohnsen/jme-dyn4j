@@ -1,8 +1,11 @@
 package jmedyn4j
 
-import java.io.IOException;
+import java.io.IOException
+import java.util.List;
+
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.geometry.AbstractShape
 import org.dyn4j.geometry.MassType
 import org.dyn4j.geometry.Transform
@@ -21,17 +24,16 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control
 import com.sun.glass.ui.Application
 
-class Dyn4JShapeControl implements Control {
+class Dyn4JShapeControl implements Control, IDyn4JControl {
 	private Spatial spatial
 	protected Body body
 	BodyFixture fixture
 	// Leaky	
-	Dyn4JShapeControl(AbstractShape shape, MassType massType) {
+	Dyn4JShapeControl(AbstractShape shape, MassType massType, Double friction=BodyFixture.DEFAULT_FRICTION, Double restitution=BodyFixture.DEFAULT_RESTITUTION) {
 		body = new Body()
 		fixture = new BodyFixture(shape)
-		//fixture.restitution=0.2
-		//fixture.friction=0.8
-		//fixture.setDensity(10)
+		fixture.setFriction(friction)
+		fixture.setRestitution(restitution)
 		body.addFixture(fixture)
 		body.setMass(massType)
 		body.setAutoSleepingEnabled(true)
@@ -50,7 +52,16 @@ class Dyn4JShapeControl implements Control {
 	void setFriction(Double friction) {
 		fixture.setFriction(friction)
 	}
-			
+		
+	@Override
+	public List<Body> getBodies() {
+		return [body];
+	}
+
+	@Override
+	public List<Joint> getJoints() {
+		return [];
+	}
 	
 	@Override
 	public void setSpatial(Spatial spatial) {
@@ -65,7 +76,7 @@ class Dyn4JShapeControl implements Control {
 	private Transform lastTransform = new Transform()
 	
 	private final static Float negligibleAngleRotation = 0.001f
-	protected void updateFromAppState() {
+	void updateFromAppState() {
 		Vector2 vector2 = body.getTransform().getTranslation()
 		this.spatial.setLocalTranslation(
 			new Float(vector2.x), 
@@ -111,4 +122,6 @@ class Dyn4JShapeControl implements Control {
 	@Override
 	public void render(RenderManager rm, ViewPort vp) {
 	}
+
+
 }
