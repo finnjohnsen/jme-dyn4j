@@ -9,3 +9,4 @@ bin
 .gradle
 *.log
 build
+/gradle.properties
