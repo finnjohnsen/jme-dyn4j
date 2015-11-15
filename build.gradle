@@ -1,23 +1,23 @@
-  apply plugin: 'groovy'
+apply plugin: 'groovy'
 
-  sourceCompatibility = 1.8
-  
-  repositories {
-    mavenCentral()
-    jcenter()
-    maven {
-      url 'http://updates.jmonkeyengine.org/maven'
-    }
-  }
-  
-  def jmonkeyengine_version = '3.1.0-SNAPSHOT'
-  dependencies {
-      compile 'org.codehaus.groovy:groovy-all:2.4.3'
-	  compile 'org.dyn4j:dyn4j:3.2.0'
-	  
-      compile "com.jme3:jme3-core:$jmonkeyengine_version"
-      testCompile "com.jme3:jme3-jogg:$jmonkeyengine_version"
-      testCompile "com.jme3:jme3-desktop:$jmonkeyengine_version"
-      testCompile "com.jme3:jme3-lwjgl:$jmonkeyengine_version"
-      testCompile "junit:junit:4.12"
-  }
+sourceCompatibility = 1.8
+version = '0.1-SNAPSHOT'
+group = 'jme-dyn4j'
+
+repositories {
+	mavenCentral()
+	jcenter()
+	maven { url 'http://updates.jmonkeyengine.org/maven' }
+}
+
+def jmonkeyengine_version = '3.1.0-SNAPSHOT'
+dependencies {
+	compile 'org.codehaus.groovy:groovy-all:2.4.3'
+	compile 'org.dyn4j:dyn4j:3.2.0'
+
+	compile "com.jme3:jme3-core:$jmonkeyengine_version"
+	testCompile "com.jme3:jme3-jogg:$jmonkeyengine_version"
+	testCompile "com.jme3:jme3-desktop:$jmonkeyengine_version"
+	testCompile "com.jme3:jme3-lwjgl:$jmonkeyengine_version"
+	testCompile "junit:junit:4.12"
+}
