@@ -116,10 +116,15 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		}
 		
 		if (jump) {
+			println "${body.getLinearVelocity().y}"
 			jump=false
-			if (body.getInContactBodies(false).size() > 0) { //poor mans "is on ground" check.
+			if (body.getInContactBodies(false).size() == 0) { //poor mans "is on ground" check.
+			} else if (body.getLinearVelocity().y>0.1) {	
+			} else {
 				body.applyImpulse(new Vector2(0, weight*3.0));
-			} 
+			}
+			 
+			
 		}
 		
 		Vector2 vector2 = body.getTransform().getTranslation()
