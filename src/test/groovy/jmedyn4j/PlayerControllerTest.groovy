@@ -74,10 +74,10 @@ class PlayerControllerTest extends SimpleApplication {
 
 		new Timer().schedule({
 			/*
-			 byzanz-record --duration=6 --x=0 --y=30 --width=320 --height=340 /home/finn/src/jme-dyn4j/etc/jme-dyn4j.gif
+			 sleep 2 & byzanz-record --duration=6 --x=0 --y=60 --width=320 --height=325 /home/finn/src/jme-dyn4j/etc/PlayerControl.gif
 			 */
 			//"sh /home/finn/src/jme-dyn4j/etc/mv-srv.sh".execute()
-		} as TimerTask, 100)
+		} as TimerTask, 500)
 	}
 	
 	Dyn4JPlayerControl playerControl
@@ -139,7 +139,7 @@ class PlayerControllerTest extends SimpleApplication {
 	void createWorld(Dyn4JAppState dyn4JAppState) {
 		createFloor(dyn4JAppState);
 		(1..4).each {
-			createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(Math.random()*25)), dyn4JAppState)
+			createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(-8)), dyn4JAppState)
 		}
 	}
 
