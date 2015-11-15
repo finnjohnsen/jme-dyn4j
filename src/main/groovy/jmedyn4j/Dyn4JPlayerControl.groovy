@@ -26,7 +26,6 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	Body controller
 	MotorJoint joint
 	BodyFixture bodyFixture
-	// Leaky	
 	
 	Long density = 4
 	Dyn4JPlayerControl(AbstractShape shape, MassType massType) {
@@ -96,17 +95,11 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		this.spatial = spatial
 		body.translate(new Double(spatial.getLocalTranslation().x), new Double(spatial.getLocalTranslation().y))
 		controller.translate(new Double(spatial.getLocalTranslation().x), new Double(spatial.getLocalTranslation().y))
-		//TODO: set initial rotation of the dyn4j-Body
-		
 	}
 
 	private Double lastAngle=-1
 	private Transform lastTransform = new Transform()
 	void updateFromAppState() {
-		//println "b:${body.getTransform().getTranslation()}"
-		//println "c:${controller.getTransform().getTranslation()}"
-		//println "${body.getLinearVelocity().x}"
-		//println "${body.getLinearVelocity().x}"
 		if (walkRight) {
 			if (body.getLinearVelocity().x < 0) body.setLinearVelocity(0, body.getLinearVelocity().y)
 			if (body.getLinearVelocity().x < 3) body.applyImpulse(new Vector2(2, 0));
@@ -120,19 +113,15 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 			}
 		}
 		
-		
 		if (jump) {
 			jump=false
 			body.applyImpulse(new Vector2(0, 8));
-			
 		}
 		
 		Vector2 vector2 = body.getTransform().getTranslation()
-		
 		this.spatial.setLocalTranslation(
 			new Float(vector2.x), 
 			new Float(vector2.y), 0f)
-		
 		
 		Transform transform = body.getTransform()
 		if (transform.getTranslation().x == lastTransform.getTranslation().x && 
@@ -152,33 +141,16 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 			this.spatial.setLocalRotation(roll)
 			lastAngle = angle
 		} 
-		
 	}
 	
 	Boolean walkRight = false
 	Boolean walkLeft = false
 	Boolean jump = false
 	
-	double walkForce=100
-	private void applyForce(Force forceUpdate) {
-		/*
-		if (forceUpdate.getForce().x >0 && body.getChangeInPosition().x<0) {
-			body.getForce()
-		}*/
-		
-		body.clearAccumulatedForce()
-		controller.clearAccumulatedForce()
-		body.clearAccumulatedTorque()
-		controller.clearAccumulatedTorque()
-		
-		body.applyForce(forceUpdate)
-		controller.applyForce(forceUpdate)
-		
-	}
-	
 	void moveRight() {
 		walkRight=true
 	}
+	
 	void moveLeft() {
 		walkLeft=true
 	}
@@ -186,28 +158,24 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	void stopMoveRight() {
 		walkRight=false
 	}
+	
 	void stopMoveLeft() {
 		walkLeft=false
 	}
 	
 	void jump() {
 		jump=true
-		//applyForce(new Force(0, 400))
 	}
-	
 	
 	@Override
 	public void update(float tpf) {
-		//Dyn4JAppState handles everything
 	}
 	
-	@Override
-	public void write(JmeExporter ex) throws IOException {
-	}
+	@Override 
+	public void write(JmeExporter ex) throws IOException {}
 
-	@Override
-	public void read(JmeImporter im) throws IOException {
-	}
+	@Override 
+	public void read(JmeImporter im) throws IOException {}
 
 	@Override
 	public Control cloneForSpatial(Spatial spatial) {
