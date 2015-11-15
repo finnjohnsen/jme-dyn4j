@@ -59,6 +59,7 @@ class PlayerControllerTest extends SimpleApplication {
 
 	@Override
 	public void simpleInitApp() {
+		viewPort.setBackgroundColor(new ColorRGBA(new Float(135/255f),new Float(206/255f),new Float(250/255f), 1f))
 
 		inputManager.setCursorVisible(true)
 		flyCam.setEnabled(false);
@@ -84,7 +85,7 @@ class PlayerControllerTest extends SimpleApplication {
 	
 	private initPlayer(Vector2f location, Dyn4JAppState dyn4JAppState) {
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.setColor("Color", ColorRGBA.Cyan)
+		mat.setColor("Color", ColorRGBA.Black)
 		
 		Geometry cylGeom = new Geometry("Cylinder", new Cylinder(20, 50, 0.3f, 2f))
 		cylGeom.setMaterial(mat)
@@ -153,7 +154,7 @@ class PlayerControllerTest extends SimpleApplication {
 		Box b = new Box(new Float(width), new Float(thickness), Z_THICKNESS)
 		Geometry floorGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.setColor("Color", ColorRGBA.Green)
+		mat.setColor("Color", new ColorRGBA(new Float(160/255f),new Float(82/255f),new Float(45/255f), 1f))
 		floorGeom.setMaterial(mat)
 		floorGeom.setLocalTranslation(0f, -8f, 0f)
 		rootNode.attachChild(floorGeom)
@@ -171,7 +172,7 @@ class PlayerControllerTest extends SimpleApplication {
 		Box b = new Box(new Float(boxSize), new Float(boxSize), Z_THICKNESS)
 		Geometry boxGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.setColor("Color", ColorRGBA.Brown)
+		mat.setColor("Color", new ColorRGBA(new Float(255/255f),new Float(228/255f),new Float(225/255f), 1f))
 
 		boxGeom.setLocalTranslation(location.x, location.y, 0f)
 		boxGeom.setMaterial(mat)
