@@ -26,9 +26,7 @@ import com.jme3.scene.*;
 class BasicTest extends SimpleApplication {
 	
 	static final Float Z_THICKNESS=0.5f
-	/* 
-byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
-	 */
+	
 	public static void main(String... args) {
 		BasicTest main = new BasicTest()
 		//main.setDisplayFps(false)
@@ -47,7 +45,7 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 	
 	@Override
 	public void simpleInitApp() {
-		
+		viewPort.setBackgroundColor(new ColorRGBA(new Float(135/255f),new Float(206/255f),new Float(250/255f), 1f))
 		inputManager.setCursorVisible(true)
 		flyCam.setEnabled(false);
 		flyCam.setMoveSpeed(15f)
@@ -63,7 +61,7 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 			/*
 			 byzanz-record --duration=6 --x=0 --y=30 --width=320 --height=340 /home/finn/src/jme-dyn4j/etc/jme-dyn4j.gif
 				  */
-			//"sh /home/finn/src/jme-dyn4j/etc/mv-srv.sh".execute()
+			"sh /home/finn/src/jme-dyn4j/etc/mv-srv.sh".execute()
 		} as TimerTask, 100)
 	}
 
@@ -80,7 +78,7 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 	
 	private createCylynder(Vector2f location, Dyn4JAppState dyn4JAppState) {
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.setColor("Color", ColorRGBA.Cyan)
+		mat.setColor("Color", ColorRGBA.Gray)
 		
 		Geometry cylGeom = new Geometry("Cylinder", new Cylinder(20, 50, 0.3f, 2f))
 		cylGeom.setMaterial(mat)
@@ -102,18 +100,15 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 	}
 	
 	private createBox(Vector2f location, Dyn4JAppState dyn4JAppState) {
-		Double boxSize = 0.5f;
+		Double boxSize = 0.7f;
 		Box b = new Box(new Float(boxSize), new Float(boxSize), Z_THICKNESS)
 		Geometry boxGeom = new Geometry("Box", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 		mat.setColor("Color", ColorRGBA.Brown)
-
 		boxGeom.setLocalTranslation(location.x, location.y, 0f)
 		boxGeom.setMaterial(mat)
 		rootNode.attachChild(boxGeom)
 		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL)
-		physics.setRestitution(0.5)
-		physics.setDesity(4)
 		boxGeom.addControl(physics)
 		dyn4JAppState.add(boxGeom)
 	}
@@ -123,14 +118,11 @@ byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
 		Sphere b = new Sphere(5, 30, new Float(radius))
 		Geometry boxGeom = new Geometry("Sphere", b)
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.setColor("Color", ColorRGBA.Blue)
-
+		mat.setColor("Color", ColorRGBA.Orange)
 		boxGeom.setLocalTranslation(location.x, location.y, 0f)
 		boxGeom.setMaterial(mat)
 		rootNode.attachChild(boxGeom)
 		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Circle(radius), MassType.NORMAL)
-		physics.setRestitution(0.8f)
-		physics.setDesity(4)
 		boxGeom.addControl(physics)
 		dyn4JAppState.add(boxGeom)
 	}

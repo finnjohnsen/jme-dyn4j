@@ -10,6 +10,7 @@ import org.dyn4j.geometry.MassType
 import org.dyn4j.geometry.Rectangle
 import org.dyn4j.geometry.Transform
 
+import com.jme3.app.LostFocusBehavior;
 import com.jme3.app.SimpleApplication
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener
@@ -38,6 +39,7 @@ class PlayerControllerTest extends SimpleApplication {
 		PlayerControllerTest main = new PlayerControllerTest()
 		//main.setDisplayFps(false)
 		main.setDisplayStatView(false)
+		main.setLostFocusBehavior(LostFocusBehavior.Disabled)
 		main.setShowSettings(false)
 		AppSettings settings = new AppSettings(true)
 		settings.setResolution(300, 300)
@@ -75,7 +77,7 @@ class PlayerControllerTest extends SimpleApplication {
 
 		new Timer().schedule({
 			/*
-			 sleep 2 & byzanz-record --duration=6 --x=0 --y=60 --width=320 --height=325 /home/finn/src/jme-dyn4j/etc/PlayerControl.gif
+			 sleep 2 ; byzanz-record --duration=18 --x=0 --y=60 --width=320 --height=325 /home/finn/src/jme-dyn4j/etc/new.gif
 			 */
 			//"sh /home/finn/src/jme-dyn4j/etc/mv-srv.sh".execute()
 		} as TimerTask, 500)
@@ -85,7 +87,6 @@ class PlayerControllerTest extends SimpleApplication {
 	
 	private initPlayer(Vector2f location, Dyn4JAppState dyn4JAppState) {
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.getAdditionalRenderState().setWireframe(true);
 		mat.getAdditionalRenderState().setWireframe(true);
 		mat.setColor("Color", ColorRGBA.Red)
 		
