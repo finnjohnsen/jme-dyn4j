@@ -29,11 +29,11 @@ class BasicTest extends SimpleApplication {
 	
 	public static void main(String... args) {
 		BasicTest main = new BasicTest()
-		//main.setDisplayFps(false)
+		main.setDisplayFps(false)
 		main.setDisplayStatView(false)
 		main.setShowSettings(false)
 		AppSettings settings = new AppSettings(true)
-		settings.setResolution(300, 300)
+		settings.setResolution(400, 400)
 		settings.setVSync(true)
 		settings.setTitle("JME-DYN4J-TEST")
 		main.setSettings(settings)

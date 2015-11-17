@@ -16,6 +16,7 @@ import org.dyn4j.dynamics.World
 class Dyn4JAppState extends AbstractAppState {
 	private World world
 	private Set<Spatial> spatials = new HashSet<Spatial>();
+	Boolean manualUpdatePhysics = false
 	
 	void add(Spatial spatial) {
 		if (world == null) world = new World()
@@ -37,18 +38,25 @@ class Dyn4JAppState extends AbstractAppState {
 		super.stateDetached(stateManager);
 	}
 	
+	
+	public void updateWorld(float tpf) {
+		world.update(tpf)
+	}
+	
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
-		world.update(tpf)
+		world.update(tpf, Integer.MAX_VALUE)
+		
+		
 		synchronized(spatials) {
 			spatials.asList().each { Spatial spatial ->
 				IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
 				if (ctl == null) { spatials.remove(spatial); return; } //evict nodes which have their Dyn4JShapeControl removed
-				
 				ctl.updateFromAppState()
 			}
 		}
+		
 	}
 
 	@Override

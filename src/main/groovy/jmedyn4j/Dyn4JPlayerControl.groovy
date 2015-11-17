@@ -22,8 +22,11 @@ import com.jme3.scene.Spatial
 import com.jme3.scene.control.Control
 
 class Dyn4JPlayerControl implements Control, IDyn4JControl {
+	Boolean debugging = false
+	
 	private Spatial spatial
 	private Long weight = 80
+	
 	
 	private Body mainBody
 	private Body controllerbody
@@ -77,6 +80,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private Double lastAngle=-1
 	private Transform lastTransform = new Transform()
 	void updateFromAppState() {
+		if (debugging) println "updateFromAppState"
 		updateWalkDirection()
 		updateJump()
 		updateLocation()
@@ -89,16 +93,33 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 			Quaternion roll = new Quaternion()
 			roll.fromAngleAxis( new Float(angle) , Vector3f.UNIT_Z);
 			this.spatial.setLocalRotation(roll)
+			if (debugging) println "rotating to ${angle}"
 			lastAngle = angle
 		}
 	}
 
+	Map getTrlv() {
+		Vector2 tr = mainBody.getTransform().getTranslation()
+		Vector2 lv = mainBody.getLinearVelocity()
+		return [tr:[x:tr.x.round(4), y:tr.y.round(4)], lv:[x:lv.x.round(4), y:lv.y.round(4)]]
+	}
+	
+	void setTrlv(Map trlv) {
+		Transform tr = new Transform()
+		tr.setTranslation(trlv.tr.x, trlv.tr.y)
+		tr.setRotation(mainBody.getTransform().getRotation())
+		mainBody.setTransform(tr)
+		mainBody.setLinearVelocity(trlv.lv.x, trlv.lv.y)
+	}
+	
+	
 	private updateLocation() {
 		Vector2 vector2 = mainBody.getTransform().getTranslation()
+		if (debugging) println "moving to $vector2"
 		this.spatial.setLocalTranslation(
 				new Float(vector2.x),
 				new Float(vector2.y), 0f)
-
+/*
 		Transform transform = mainBody.getTransform()
 		if (transform.getTranslation().x == lastTransform.getTranslation().x &&
 		transform.getTranslation().y == lastTransform.getTranslation().y) {
@@ -108,19 +129,19 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 					new Float(transform.getTranslation().y),
 					0f))
 			lastTransform=transform
-		}
+		}*/
 	}
 
 	private updateJump() {
 		if (jump) {
-			//println "${body.getLinearVelocity().y}"
 			jump=false
-			if (mainBody.getInContactBodies(false).size() == 0) { //poor mans "is on ground" check.
-			} else if (mainBody.getLinearVelocity().y>0.1) {
-			} else {
-				mainBody.applyImpulse(new Vector2(0, weight*3.0));
-			}
+			if (canJump()) mainBody.applyImpulse(new Vector2(0, weight*3.5));
 		}
+	}
+	
+	Boolean canJump() {
+		(mainBody.getInContactBodies(false).size() != 0 
+		&& mainBody.getLinearVelocity().y<0.1)
 	}
 
 	private updateWalkDirection() {
@@ -138,9 +159,21 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		}
 	}
 	
-	Boolean walkRight = false
-	Boolean walkLeft = false
-	Boolean jump = false
+	private Boolean walkRight = false
+	private Boolean walkLeft = false
+	private Boolean jump = false
+	
+	void doMove(String move) {
+		switch (move) {
+			case ("Join"):  break; /*ignore*/
+			case ("Right"): moveRight(); break;
+			case ("Left"): moveLeft(); break;
+			case ("StopLeft"): stopMoveLeft(); break;
+			case ("StopRight"): stopMoveRight(); break;
+			case ("Jump"): jump(); break;
+			default: println "No idea what to do about $move"; 
+		}
+	}
 	
 	void moveRight() {
 		walkRight=true
