@@ -16,7 +16,6 @@ import org.dyn4j.dynamics.World
 class Dyn4JAppState extends AbstractAppState {
 	private World world
 	private Set<Spatial> spatials = new HashSet<Spatial>();
-	Boolean manualUpdatePhysics = false
 	
 	void add(Spatial spatial) {
 		if (world == null) world = new World()

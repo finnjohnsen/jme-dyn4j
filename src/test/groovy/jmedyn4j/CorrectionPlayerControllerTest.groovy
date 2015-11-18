@@ -100,9 +100,9 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		
 		
 		Node correctionWorldNode = new Node("correctionWorldNode")
-		correctionWorldNode.setLocalTranslation(0f, 5f, -5f)
+		correctionWorldNode.setLocalTranslation(0f, 5f, -100f)
 		rootNode.attachChild(correctionWorldNode)
-		Dyn4JAppState correctionDyn4JAppState = new Dyn4JAppState(manualUpdatePhysics:false)
+		Dyn4JAppState correctionDyn4JAppState = new Dyn4JAppState()
 		//stateManager.attach(correctionDyn4JAppState)
 		CorrectionWorldAppState correctionAppState = new CorrectionWorldAppState(correctionDyn4JAppState:correctionDyn4JAppState, worldNode:correctionWorldNode, assetManager:assetManager)
 		EventBus.subscribe(correctionAppState)

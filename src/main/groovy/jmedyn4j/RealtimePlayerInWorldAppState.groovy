@@ -1,5 +1,6 @@
 package jmedyn4j
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import net.engio.mbassy.listener.Handler
@@ -22,7 +23,7 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 	private final static ConcurrentLinkedQueue actionQueue = new ConcurrentLinkedQueue();
 	AssetManager assetManager
 	Dyn4JAppState realtimeDyn4JAppState
-	Dyn4JPlayerControl playerControl
+	Dyn4JPlayerControl clientSidePlayerControl
 	
 	Node worldNode
 	
@@ -41,27 +42,31 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
+		if (newTrvl != null) {
+			clientSidePlayerControl.performCorrection(newTrvl)
+			newTrvl=null
+		}
 		//println "$tpf"
 		
 		Map action = actionQueue.poll()
 		if (action != null) {
 			if (joined) {
 				if (action.action=="Right") {
-					playerControl.moveRight()
-					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:playerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					clientSidePlayerControl.moveRight()
+					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="StopRight") {
-					playerControl.stopMoveRight()
-					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:playerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					clientSidePlayerControl.stopMoveRight()
+					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="Left") {
-					playerControl.moveLeft()
-					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:playerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					clientSidePlayerControl.moveLeft()
+					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="StopLeft") {
-					playerControl.stopMoveLeft()
-					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:playerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					clientSidePlayerControl.stopMoveLeft()
+					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="Jump") {
-					if (playerControl.canJump()) {
-						playerControl.jump()
-						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:playerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					if (clientSidePlayerControl.canJump()) {
+						clientSidePlayerControl.jump()
+						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 					}
 				}
 			} else {
@@ -71,9 +76,9 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 					} else {
 						println "joining"
 						joined=true
-						playerControl=initPlayer(new Vector2f(0f, 0f), realtimeDyn4JAppState, worldNode, assetManager)
+						clientSidePlayerControl=initPlayer(new Vector2f(0f, 0f), realtimeDyn4JAppState, worldNode, assetManager)
 						
-						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:playerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 					}
 				}
 			}
@@ -83,9 +88,9 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 	
 	private static Dyn4JPlayerControl initPlayer(Vector2f location, Dyn4JAppState dyn4JAppState, Node worldNode, AssetManager assetManager) {
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-		mat.getAdditionalRenderState().setWireframe(true);
-		mat.getAdditionalRenderState().setWireframe(true);
+		
 		mat.setColor("Color", ColorRGBA.Red)
+		mat.getAdditionalRenderState().setWireframe(true);
 		
 		Geometry cylGeom = new Geometry("Cylinder", new Cylinder(20, 50, 0.3f, 1.8f))
 		cylGeom.setMaterial(mat)
@@ -105,10 +110,14 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 		return playerControl
 	}
 	
+	Map newTrvl
+	
 	@Handler
 	void handleAction(Map action) {
-		if (action.actionType != "localMovement") return;
-		actionQueue.add(action)
+		if (action.actionType == "localMovement") actionQueue.add(action);
+		if (action.actionType == "correct") {
+			 newTrvl=action.trvl
+		}
 	}
 
 }

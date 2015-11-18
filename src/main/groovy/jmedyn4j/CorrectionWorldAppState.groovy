@@ -10,6 +10,8 @@ import com.jme3.math.Vector2f
 import com.jme3.scene.Node
 
 import net.engio.mbassy.listener.Handler;
+import static CorrectionPlayerControllerTest.EventBus
+
 
 class CorrectionWorldAppState extends AbstractAppState {
 	private final static ConcurrentLinkedQueue clientSideActionBacklog = new ConcurrentLinkedQueue();
@@ -17,7 +19,7 @@ class CorrectionWorldAppState extends AbstractAppState {
 	AssetManager assetManager
 	Dyn4JAppState correctionDyn4JAppState
 	Node worldNode
-	Dyn4JPlayerControl playerControl
+	Dyn4JPlayerControl correctionPlayer
 	
 	@Override
 	public void stateAttached(AppStateManager stateManager) {
@@ -51,41 +53,39 @@ class CorrectionWorldAppState extends AbstractAppState {
 			didCorrection = true
 			//println "processing server backlog"
 			if (serverBacklogAction.action == "Join") {
-				playerControl = RealtimePlayerInWorldAppState.initPlayer(new Vector2f(0f, 0f), correctionDyn4JAppState, worldNode, assetManager)
-				//playerControl.debugging=true
-				Long diff = serverBacklogAction.time.getTime() - lastTime.getTime()
-				Float updateTPF = new Float(diff/1000f)
-				//println "login gets some update time $updateTPF"
-				correctionDyn4JAppState.update(updateTPF)
+				/*Long diff = serverBacklogAction.time.getTime() - lastTime.getTime()
+				Float updateTPF = new Float(diff/1000f)*/
+				lastTime = new Date()
+				correctionPlayer = RealtimePlayerInWorldAppState.initPlayer(new Vector2f(0f, 0f), correctionDyn4JAppState, worldNode, assetManager)
+				correctionDyn4JAppState.update(0)
 			} else if (["Jump", "Right", "StopRight", "Left", "StopLeft"].contains(serverBacklogAction.action)) {
 				Map clientAction = clientSideActionBacklog.poll()
 				while (clientAction != null) { // move to pre-correction
 					if (clientAction.cnt < serverBacklogAction.cnt) {
-						playerControl.setTrlv(clientAction.trvl)
-						playerControl.doMove(clientAction.action)
+						//println "pre"
 						Long diff = clientAction.time.getTime() - lastTime.getTime()
 						Float updateTPF = new Float(diff/1000f)
-						//println "local pre-correction step $updateTPF"
 						correctionDyn4JAppState.update(updateTPF)
+						lastTime=clientAction.time
+						correctionPlayer.setTrvl(clientAction.trvl)
+						correctionPlayer.doMove(clientAction.action)
 					} else if (clientAction.cnt == serverBacklogAction.cnt) { //correction
+						//println "corr from ${serverBacklogAction.cnt}"
+						
 						Long diff = clientAction.time.getTime() - lastTime.getTime()
 						Float updateTPF = new Float(diff/1000f)
-						//println "exact server correction step $updateTPF"
 						correctionDyn4JAppState.update(updateTPF)
 						lastTime=clientAction.time
-						playerControl.setTrlv(serverBacklogAction.trvl)
-						playerControl.doMove(serverBacklogAction.action)
+						correctionPlayer.setTrvl(serverBacklogAction.trvl)
+						correctionPlayer.doMove(serverBacklogAction.action)
 					} else if (clientAction.cnt > serverBacklogAction.cnt) {
+						//println "post ${clientAction.cnt}"
 						Long diff = clientAction.time.getTime() - lastTime.getTime()
 						Float updateTPF = new Float(diff/1000f)
-						//println "simulating fast-forward serverBacklogAction, by $updateTPF"
 						correctionDyn4JAppState.update(updateTPF)
 						lastTime=clientAction.time
-					
-						playerControl.setTrlv(clientAction.trvl )
-						playerControl.doMove(clientAction.action)
-						//println "local post-correction step $updateTPF"
-						//println "fast-forwarding to ${clientAction.cnt}"
+						correctionPlayer.setTrvl(clientAction.trvl )
+						correctionPlayer.doMove(clientAction.action)
 					}
 					clientAction = clientSideActionBacklog.poll()
 				}
@@ -93,13 +93,14 @@ class CorrectionWorldAppState extends AbstractAppState {
 			serverBacklogAction = serverBacklog.poll()
 		}
 		
-		if (didCorrection) { // final local stretch to try find exact now.
+		if (didCorrection) { // final local stretch with last command given, to try match the exact presence.
 			Date now = new Date()
 			Long diff = now.getTime() - lastTime.getTime()
-			Float updateTPF = new Float(diff/1000f)
-			println "catchup to now by $updateTPF"
+			Float updateTPF = new Float((diff/1000f))
+			//println "catchup to now by $updateTPF"
 			correctionDyn4JAppState.update(updateTPF)
 			lastTime=now
+			EventBus.publish([actionType:"correct", trvl:correctionPlayer.getTrlv()])
 		}
 	}
 	
