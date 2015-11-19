@@ -15,7 +15,7 @@ import static CorrectionPlayerControllerTest.EventBus
 
 class CorrectionWorldAppState extends AbstractAppState {
 	private final static ConcurrentLinkedQueue clientSideActionBacklog = new ConcurrentLinkedQueue();
-	private final static ConcurrentLinkedQueue serverBacklog = new ConcurrentLinkedQueue();
+	private final static ConcurrentLinkedQueue serverActionBacklog = new ConcurrentLinkedQueue();
 	AssetManager assetManager
 	Dyn4JAppState correctionDyn4JAppState
 	Node worldNode
@@ -29,85 +29,90 @@ class CorrectionWorldAppState extends AbstractAppState {
 		assert assetManager
 	}
 	
-	private static final Boolean processLastServerMessage=true
 	
 	Date lastTime = new Date()
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
-		if (!clientSideActionBacklog.peek()) {
-			 return
-		}
-		
-		Boolean didCorrection = false
-		Map serverBacklogAction = serverBacklog.poll()
-		
-		if (processLastServerMessage){
-			if (serverBacklog.size() > 1) println "skipping to last server message, discarding ${serverBacklog.size()} messages"
-			while(serverBacklog.peek() != null) {
-				serverBacklogAction = serverBacklog.poll()
-			}
-		}
-		
-		while(serverBacklogAction != null) {
-			didCorrection = true
-			//println "processing server backlog"
-			if (serverBacklogAction.action == "Join") {
-				/*Long diff = serverBacklogAction.time.getTime() - lastTime.getTime()
-				Float updateTPF = new Float(diff/1000f)*/
+		Map serverAction
+		synchronized(this) {
+			if (serverActionBacklog.peek()?.action == "Join") {
+				Map joinAction = serverActionBacklog.poll()
+				latestProcessedAction = joinAction.cnt
 				lastTime = new Date()
 				correctionPlayer = RealtimePlayerInWorldAppState.initPlayer(new Vector2f(0f, 0f), correctionDyn4JAppState, worldNode, assetManager)
 				correctionDyn4JAppState.update(0)
-			} else if (["Jump", "Right", "StopRight", "Left", "StopLeft"].contains(serverBacklogAction.action)) {
-				Map clientAction = clientSideActionBacklog.poll()
-				while (clientAction != null) { // move to pre-correction
-					if (clientAction.cnt < serverBacklogAction.cnt) {
-						//println "pre"
-						Long diff = clientAction.time.getTime() - lastTime.getTime()
-						Float updateTPF = new Float(diff/1000f)
-						correctionDyn4JAppState.update(updateTPF)
-						lastTime=clientAction.time
-						correctionPlayer.setTrvl(clientAction.trvl)
-						correctionPlayer.doMove(clientAction.action)
-					} else if (clientAction.cnt == serverBacklogAction.cnt) { //correction
-						//println "corr from ${serverBacklogAction.cnt}"
-						
-						Long diff = clientAction.time.getTime() - lastTime.getTime()
-						Float updateTPF = new Float(diff/1000f)
-						correctionDyn4JAppState.update(updateTPF)
-						lastTime=clientAction.time
-						correctionPlayer.setTrvl(serverBacklogAction.trvl)
-						correctionPlayer.doMove(serverBacklogAction.action)
-					} else if (clientAction.cnt > serverBacklogAction.cnt) {
-						//println "post ${clientAction.cnt}"
-						Long diff = clientAction.time.getTime() - lastTime.getTime()
-						Float updateTPF = new Float(diff/1000f)
-						correctionDyn4JAppState.update(updateTPF)
-						lastTime=clientAction.time
-						correctionPlayer.setTrvl(clientAction.trvl )
-						correctionPlayer.doMove(clientAction.action)
-					}
-					clientAction = clientSideActionBacklog.poll()
-				}
-			} 
-			serverBacklogAction = serverBacklog.poll()
+				return;
+			}
+			
+			if (serverActionBacklog.peek() == null || clientSideActionBacklog.peek() == null) return
+			while(clientSideActionBacklog.peek() != null) {
+				Map clientAction = clientSideActionBacklog.peek()
+				if (clientAction.cnt < serverActionBacklog.peek().cnt) { 
+					clientSideActionBacklog.poll()
+				} else break;
+			}
+			if (clientSideActionBacklog.peek() == null) return
+			serverAction = serverActionBacklog.poll()
 		}
 		
-		if (didCorrection) { // final local stretch with last command given, to try match the exact presence.
+		Long correctionCnt
+		if (["Jump", "Right", "StopRight", "Left", "StopLeft"].contains(serverAction.action)) {
+			correctionCnt = processActions(serverAction)
+		} 
+
+		if (correctionCnt!=null) {
 			Date now = new Date()
-			Long diff = now.getTime() - lastTime.getTime()
-			Float updateTPF = new Float((diff/1000f))
-			//println "catchup to now by $updateTPF"
+			Float updateTPF = new Float((now.getTime() - lastTime.getTime())/1000f)
 			correctionDyn4JAppState.update(updateTPF)
-			lastTime=now
-			EventBus.publish([actionType:"correct", trvl:correctionPlayer.getTrlv()])
+			lastTime = now
+			Map trlv = correctionPlayer.getTrlv()
+			EventBus.publish([actionType:"correct", trlv:trlv])
 		}
 	}
+
+	//Long correctionBatch = 0
+	private Long processActions(Map serverAction) {
+		Long correctionCnt = null
+		Map clientAction = clientSideActionBacklog.poll()
+		Map previousClientAction
+		while (clientAction != null) {
+			latestProcessedAction = clientAction.cnt
+			if (clientAction.cnt < serverAction.cnt) { // do nothing with these
+			} else if (clientAction.cnt == serverAction.cnt) { //the actual correction
+				lastTime = clientAction.time
+				correctionPlayer.setMove(clientAction.action)
+				correctionPlayer.setTrlv(serverAction.trlv)
+				//correctionDyn4JAppState.update(0)
+				correctionCnt=clientAction.cnt
+			} else if (clientAction.cnt > serverAction.cnt) { //after the actual correction
+				Float tpf = new Float((clientAction.time.getTime() - lastTime.getTime())/1000)
+				correctionDyn4JAppState.update(tpf)
+				lastTime = clientAction.time
+				correctionPlayer.setMove(clientAction.action)
+				correctionPlayer.setTrlv(clientAction.trlv)
+				correctionCnt=clientAction.cnt
+			}
+			previousClientAction = clientAction
+			clientAction = clientSideActionBacklog.poll()
+		}
+		return correctionCnt;
+	}
+	
+	private Long latestProcessedAction = 0
 	
 	@Handler
 	void handleAction(Map action) {
-		if (action.actionType == "executedLocalMovement") clientSideActionBacklog.add(action)
-		else if (action.actionType == "serverMovement") serverBacklog.add action
-		
+		if (action.actionType == "executedLocalMovement") {
+			clientSideActionBacklog.add(action)
+		} else if (action.actionType == "serverMovement")  {
+			synchronized(this) {
+				if (action.cnt <= latestProcessedAction) {
+					//println "${new Date()}. discarding server message ${action.cnt}"
+				} else {
+					serverActionBacklog.add action
+				}
+			}
+		}
 	}
 }

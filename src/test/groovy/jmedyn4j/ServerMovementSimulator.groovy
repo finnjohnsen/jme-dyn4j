@@ -17,12 +17,12 @@ class ServerMovementSimulator {
 	Double max = Double.MAX_VALUE
 	void update() {
 		if (serverBacklog.size() > 0 && 
-			(new Date().getTime() - lastSent.getTime() > 300)) {
+			(new Date().getTime() - lastSent.getTime() > 200)) {
 			if (cnt++ >= max) return;
 			lastSent=new Date()
 			Map action = serverBacklog.poll()
 			if (["Join", "Jump", "Right", "StopRight", "Left", "StopLeft"].contains(action.action)) {
-				EventBus.publishAsync([actionType:"serverMovement", action:action.action, time:action.time, trvl:action.trvl, cnt:action.cnt])
+				EventBus.publishAsync([actionType:"serverMovement", action:action.action, time:action.time, trlv:action.trlv, cnt:action.cnt])
 			}
 		}
 	}

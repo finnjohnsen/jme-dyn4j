@@ -42,31 +42,30 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
-		if (newTrvl != null) {
-			clientSidePlayerControl.performCorrection(newTrvl)
-			newTrvl=null
+		if (newtrlv != null) {
+			clientSidePlayerControl.performCorrection(newtrlv)
+			newtrlv=null
 		}
-		//println "$tpf"
 		
 		Map action = actionQueue.poll()
 		if (action != null) {
 			if (joined) {
 				if (action.action=="Right") {
 					clientSidePlayerControl.moveRight()
-					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="StopRight") {
 					clientSidePlayerControl.stopMoveRight()
-					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="Left") {
 					clientSidePlayerControl.moveLeft()
-					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="StopLeft") {
 					clientSidePlayerControl.stopMoveLeft()
-					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="Jump") {
 					if (clientSidePlayerControl.canJump()) {
 						clientSidePlayerControl.jump()
-						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 					}
 				}
 			} else {
@@ -78,7 +77,7 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 						joined=true
 						clientSidePlayerControl=initPlayer(new Vector2f(0f, 0f), realtimeDyn4JAppState, worldNode, assetManager)
 						
-						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trvl:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
+						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 					}
 				}
 			}
@@ -110,13 +109,13 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 		return playerControl
 	}
 	
-	Map newTrvl
+	Map newtrlv
 	
 	@Handler
 	void handleAction(Map action) {
 		if (action.actionType == "localMovement") actionQueue.add(action);
 		if (action.actionType == "correct") {
-			 newTrvl=action.trvl
+			 newtrlv=action.trlv
 		}
 	}
 

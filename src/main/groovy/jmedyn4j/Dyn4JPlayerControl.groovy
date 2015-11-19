@@ -24,10 +24,8 @@ import com.jme3.scene.control.Control
 
 class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	Boolean debugging = false
-	
 	private Spatial spatial
 	private Long weight = 80
-	
 	
 	private Body mainBody
 	private Body controllerbody
@@ -82,7 +80,6 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private Double lastAngle=-1
 	private Transform lastTransform = new Transform()
 	void updateFromAppState() {
-		if (debugging) println "updateFromAppState"
 		updateWalkDirection()
 		updateJump()
 		updateLocation()
@@ -95,7 +92,6 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 			Quaternion roll = new Quaternion()
 			roll.fromAngleAxis( new Float(angle) , Vector3f.UNIT_Z);
 			this.spatial.setLocalRotation(roll)
-			if (debugging) println "rotating to ${angle}"
 			lastAngle = angle
 		}
 	}
@@ -108,39 +104,40 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	
 	private final static Double rubberBandThreshold = 3.0;
 	private final static Double neglishableCorrectionThreshold = 0.01;
-	void performCorrection(Map newTrvl) {
+	void performCorrection(Map newTrlv) {
 		
-		Double xDiff = mainBody.getTransform().getTranslationX() - newTrvl.tr.x 
-		Double yDiff = mainBody.getTransform().getTranslationY() - newTrvl.tr.y
+		Double xDiff = mainBody.getTransform().getTranslationX() - newTrlv.tr.x 
+		Double yDiff = mainBody.getTransform().getTranslationY() - newTrlv.tr.y
 		
 		if (Math.abs(xDiff) > rubberBandThreshold) {
-			Double newTrX = newTrvl.tr.x
+			Double newTrX = newTrlv.tr.x
 			mainBody.getTransform().setTranslationX(newTrX)
 		} else if (Math.abs(xDiff) > neglishableCorrectionThreshold){
 		 	Double newTrX = mainBody.getTransform().getTranslationX() + (xDiff / 10)
 			mainBody.getTransform().setTranslationX(newTrX)
-		} else {}//{println "neglishable X"} //neglishable
+		} else {}
 		
 		if (Math.abs(yDiff) > rubberBandThreshold) {
-			Double newTrY = newTrvl.tr.y
+			Double newTrY = newTrlv.tr.y
 			mainBody.getTransform().setTranslationY(newTrY)
 		} else if (Math.abs(yDiff) > neglishableCorrectionThreshold){
 		 	Double newTrY = mainBody.getTransform().getTranslationY() + (yDiff / 10)
 			mainBody.getTransform().setTranslationY(newTrY)
-		} else {}//{println "neglishable Y"}
+		} else {}
 	}
 	
-	void setTrvl(Map trvl) {
+	
+	
+	void setTrlv(Map trlv) {
 		Transform tr = new Transform()
-		tr.setTranslation(trvl.tr.x, trvl.tr.y)
+		tr.setTranslation(trlv.tr.x, trlv.tr.y)
 		tr.setRotation(mainBody.getTransform().getRotation())
 		mainBody.setTransform(tr)
-		mainBody.setLinearVelocity(trvl.lv.x, trvl.lv.y)
+		mainBody.setLinearVelocity(trlv.lv.x, trlv.lv.y)
 	}
 	
 	private updateLocation() {
 		Vector2 vector2 = mainBody.getTransform().getTranslation()
-		if (debugging) println "moving to $vector2"
 		this.spatial.setLocalTranslation(
 				new Float(vector2.x),
 				new Float(vector2.y), 0f)
@@ -161,18 +158,15 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 
 	Double walkForceFactor = 2 //aka walk speed
 	Double walkMaxForce = 3 // stop apply walk speed if force is beyond
-	private updateWalkDirection() {
+	
+	private void updateWalkDirection() {
 		if (walkRight) {
 			if (mainBody.getLinearVelocity().x < 0) mainBody.setLinearVelocity(0, mainBody.getLinearVelocity().y) //hard turn
 			if (mainBody.getLinearVelocity().x < walkMaxForce) mainBody.applyImpulse(new Vector2(weight/walkForceFactor, 0));
 		} else if (walkLeft) {
 			if (mainBody.getLinearVelocity().x > 0) mainBody.setLinearVelocity(0, mainBody.getLinearVelocity().y)//hard turn
 			if (mainBody.getLinearVelocity().x > -walkMaxForce) mainBody.applyImpulse(new Vector2(-(weight/walkForceFactor), 0));
-		} else { //stop
-			//if (Math.abs(body.getLinearVelocity().x)>(weight/4)) {
-			//	if (body.getLinearVelocity().x>0)body.setLinearVelocity(weight/3, body.getLinearVelocity().y)
-			//	if (body.getLinearVelocity().x<0)body.setLinearVelocity(-(weight/4), body.getLinearVelocity().y)
-			//}
+		} else { //stop, let physics (friction etc) take care of it.
 		}
 	}
 	
@@ -190,6 +184,25 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 			case ("Jump"): jump(); break;
 			default: println "No idea what to do about $move"; 
 		}
+	}
+	
+	void setMove(String move) {
+		switch (move) {
+			case ("Join"):  break; /*ignore*/
+			case ("Right"): walkRight=true
+			case ("Left"): walkLeft=true
+			case ("StopLeft"): walkLeft=false
+			case ("StopRight"): walkRight=false
+			case ("Jump"): break;
+			default: println "No idea what to do about $move";
+		}
+	}
+	
+	String getMove() {
+		if (walkRight) return "Right"
+		if (walkLeft) return "Left"
+		if (jump) return "Jump"
+		return "Nothing"
 	}
 	
 	void moveRight() {
