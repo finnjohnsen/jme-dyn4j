@@ -37,7 +37,6 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 		assert assetManager
 	}
 
-
 	Long executedLocalMovementCounter = 0
 	@Override
 	public void update(float tpf) {
@@ -76,7 +75,6 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 						println "joining"
 						joined=true
 						clientSidePlayerControl=initPlayer(new Vector2f(0f, 0f), realtimeDyn4JAppState, worldNode, assetManager)
-						
 						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 					}
 				}
