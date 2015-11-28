@@ -1,5 +1,5 @@
 package jmedyn4j
-
+import static jmedyn4j.EventBusSingletonHolder.*
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState
 import com.jme3.app.state.AppState
@@ -16,7 +16,7 @@ import org.dyn4j.dynamics.World
 class Dyn4JAppState extends AbstractAppState {
 	private World world
 	private Set<Spatial> spatials = new HashSet<Spatial>();
-	
+	Boolean broadcastPhysicsTicks = false
 	void add(Spatial spatial) {
 		if (world == null) world = new World()
 		if (spatial.getControl(IDyn4JControl.class) == null) throw new IllegalArgumentException("Cannot handle a node which isnt a ${Dyn4JShapeControl.getClass().getSimpleName()}")
@@ -39,23 +39,28 @@ class Dyn4JAppState extends AbstractAppState {
 	
 	
 	public void updateWorld(float tpf) {
-		world.update(tpf)
+		//world.update(tpf)
 	}
 	
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
-		world.update(tpf, Integer.MAX_VALUE)
-		
-		
 		synchronized(spatials) {
 			spatials.asList().each { Spatial spatial ->
 				IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
 				if (ctl == null) { spatials.remove(spatial); return; } //evict nodes which have their Dyn4JShapeControl removed
-				ctl.updateFromAppState()
+				ctl.updatePhysics(tpf)
 			}
 		}
-		
+		world.update(tpf, Integer.MAX_VALUE)
+		EventBus.publishAsync([actionType:"physTick"])
+		synchronized(spatials) {
+			spatials.asList().each { Spatial spatial ->
+				IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
+				if (ctl == null) { spatials.remove(spatial); return; } //evict nodes which have their Dyn4JShapeControl removed
+				ctl.updateDraw(tpf)
+			}
+		}
 	}
 
 	@Override

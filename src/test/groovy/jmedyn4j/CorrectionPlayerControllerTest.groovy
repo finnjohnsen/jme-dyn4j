@@ -27,20 +27,11 @@ import com.jme3.scene.shape.Cylinder
 import com.jme3.scene.shape.Sphere
 import com.jme3.system.AppSettings
 import com.jme3.scene.*
-
-
-import net.engio.mbassy.bus.MBassador
-import net.engio.mbassy.bus.config.BusConfiguration
-import net.engio.mbassy.bus.config.Feature
+import static jmedyn4j.EventBusSingletonHolder.*
 
 class CorrectionPlayerControllerTest extends SimpleApplication {
 	static final Float Z_THICKNESS=0.5f
 	
-	public static final MBassador EventBus = new MBassador(new BusConfiguration()
-		.addFeature(Feature.SyncPubSub.Default())
-		.addFeature(Feature.AsynchronousHandlerInvocation.Default())
-		.addFeature(Feature.AsynchronousMessageDispatch.Default())
-		);
 	
 	/* 
 	 byzanz-record --duration=5 --x=2080 --y=560 --width=320 --height=350 test.gif
@@ -92,6 +83,7 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		Node realtimeWorldNode = new Node("realtimeWorldNode")
 		rootNode.attachChild(realtimeWorldNode)
 		realtimeDyn4JAppState = new Dyn4JAppState()
+		realtimeDyn4JAppState.broadcastPhysicsTicks=true
 		stateManager.attach(realtimeDyn4JAppState)
 		RealtimePlayerInWorldAppState realtimePlayerAppState = new RealtimePlayerInWorldAppState(realtimeDyn4JAppState:realtimeDyn4JAppState, worldNode:realtimeWorldNode, assetManager:assetManager)
 		EventBus.subscribe(realtimePlayerAppState)
@@ -100,7 +92,7 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		
 		
 		Node correctionWorldNode = new Node("correctionWorldNode")
-		correctionWorldNode.setLocalTranslation(0f, 5f, -100f)
+		correctionWorldNode.setLocalTranslation(0f, 0f, 0f)
 		rootNode.attachChild(correctionWorldNode)
 		Dyn4JAppState correctionDyn4JAppState = new Dyn4JAppState()
 		//stateManager.attach(correctionDyn4JAppState)

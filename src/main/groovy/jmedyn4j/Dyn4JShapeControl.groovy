@@ -78,7 +78,8 @@ class Dyn4JShapeControl implements Control, IDyn4JControl {
 	private Transform lastTransform = new Transform()
 	
 	private final static Float negligibleAngleRotation = 0.001f
-	void updateFromAppState() {
+	void updatePhysics(float tpf){}
+	void updateDraw(float tpf) {
 		Vector2 vector2 = body.getTransform().getTranslation()
 		this.spatial.setLocalTranslation(
 			new Float(vector2.x), 

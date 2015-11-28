@@ -79,9 +79,13 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 
 	private Double lastAngle=-1
 	private Transform lastTransform = new Transform()
-	void updateFromAppState() {
-		updateWalkDirection()
-		updateJump()
+	
+	void updatePhysics(float tpf) {
+		updateWalkDirection(tpf)
+		updateJump(tpf)
+	}
+	
+	void updateDraw(float tpf) {
 		updateLocation()
 		updateRotation()
 	}
@@ -104,7 +108,9 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	
 	private final static Double rubberBandThreshold = 3.0;
 	private final static Double neglishableCorrectionThreshold = 0.01;
+	
 	void performCorrection(Map newTrlv) {
+		println "performCorrection"
 		
 		Double xDiff = mainBody.getTransform().getTranslationX() - newTrlv.tr.x 
 		Double yDiff = mainBody.getTransform().getTranslationY() - newTrlv.tr.y
@@ -138,34 +144,40 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	
 	private updateLocation() {
 		Vector2 vector2 = mainBody.getTransform().getTranslation()
+		if (debugging) println "translation $vector2"
 		this.spatial.setLocalTranslation(
 				new Float(vector2.x),
 				new Float(vector2.y), 0f)
 	}
 
-	Double jumpForceFactor = 3.0
-	private updateJump() {
+	Double jumpForceFactor = 9.0
+	private updateJump(float tpf) {
 		if (jump) {
 			jump=false
-			if (canJump()) mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
+			if (canJump()) {
+				if (debugging)  println "JUMPING"
+				mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
+			} else {
+				if (debugging) {
+					  println "CANT JUMP"
+					  println "from ${mainBody.getTransform().getTranslation()}"
+				}
+			}
 		}
 	}
 	
 	Boolean canJump() {
-		(mainBody.getInContactBodies(false).size() != 0 
-		&& mainBody.getLinearVelocity().y<0.1)
+		
+		(mainBody.getInContactBodies(false).size() != 0)
 	}
 
-	Double walkForceFactor = 2 //aka walk speed
-	Double walkMaxForce = 3 // stop apply walk speed if force is beyond
+	Double walkForceFactor = 2//aka walk speed
 	
-	private void updateWalkDirection() {
+	private void updateWalkDirection(float tpf) {
 		if (walkRight) {
-			if (mainBody.getLinearVelocity().x < 0) mainBody.setLinearVelocity(0, mainBody.getLinearVelocity().y) //hard turn
-			if (mainBody.getLinearVelocity().x < walkMaxForce) mainBody.applyImpulse(new Vector2(weight/walkForceFactor, 0));
+			mainBody.setLinearVelocity(4, mainBody.getLinearVelocity().y) //hard turn
 		} else if (walkLeft) {
-			if (mainBody.getLinearVelocity().x > 0) mainBody.setLinearVelocity(0, mainBody.getLinearVelocity().y)//hard turn
-			if (mainBody.getLinearVelocity().x > -walkMaxForce) mainBody.applyImpulse(new Vector2(-(weight/walkForceFactor), 0));
+			mainBody.setLinearVelocity(-4, mainBody.getLinearVelocity().y)//hard turn
 		} else { //stop, let physics (friction etc) take care of it.
 		}
 	}
@@ -175,6 +187,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private Boolean jump = false
 	
 	void doMove(String move) {
+		if (debugging) println "doMove $move"
 		switch (move) {
 			case ("Join"):  break; /*ignore*/
 			case ("Right"): moveRight(); break;
@@ -187,13 +200,15 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	}
 	
 	void setMove(String move) {
+		if (debugging) println "setMove $move"
 		switch (move) {
 			case ("Join"):  break; /*ignore*/
-			case ("Right"): walkRight=true
-			case ("Left"): walkLeft=true
-			case ("StopLeft"): walkLeft=false
-			case ("StopRight"): walkRight=false
-			case ("Jump"): break;
+			case ("NoMove"): walkRight=false;walkLeft=false; break;
+			case ("Right"): walkRight=true; break;
+			case ("Left"): walkLeft=true; break;
+			case ("StopLeft"): walkLeft=false; break;
+			case ("StopRight"): walkRight=false; break;
+			case ("Jump"): jump=true;break;
 			default: println "No idea what to do about $move";
 		}
 	}
@@ -206,10 +221,12 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	}
 	
 	void moveRight() {
+		if (debugging) println "moveRight()"
 		walkRight=true
 	}
 	
 	void moveLeft() {
+		if (debugging) println "moveLeft()"
 		walkLeft=true
 	}
 	

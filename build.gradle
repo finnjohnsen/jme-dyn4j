@@ -14,12 +14,11 @@ def jmonkeyengine_version = '3.1.0-SNAPSHOT'
 dependencies {
 	compile 'org.codehaus.groovy:groovy-all:2.4.3'
 	compile 'org.dyn4j:dyn4j:3.2.0'
-
-	compile "com.jme3:jme3-core:$jmonkeyengine_version"
+	
 	compile 'net.engio:mbassador:1.2.1'
-	testCompile "com.jme3:jme3-jogg:$jmonkeyengine_version"
-	testCompile "com.jme3:jme3-desktop:$jmonkeyengine_version"
-	testCompile "com.jme3:jme3-lwjgl:$jmonkeyengine_version"
+//	compile "com.jme3:jme3-jogg:$jmonkeyengine_version"
+	compile "com.jme3:jme3-desktop:$jmonkeyengine_version"
+	compile "com.jme3:jme3-lwjgl:$jmonkeyengine_version"
 	testCompile "junit:junit:4.12"
 }
 

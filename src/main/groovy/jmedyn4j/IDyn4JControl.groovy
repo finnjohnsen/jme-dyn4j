@@ -5,6 +5,7 @@ import org.dyn4j.dynamics.World
 import org.dyn4j.dynamics.joint.Joint
 
 interface IDyn4JControl {
-	void updateFromAppState()
+	void updatePhysics(float tpf)
+	void updateDraw(float tpf)
 	void addToWorld(World world)
 }

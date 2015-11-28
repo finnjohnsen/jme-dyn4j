@@ -17,7 +17,7 @@ import com.jme3.math.Vector3f
 import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Cylinder
 import com.jme3.scene.*
-import static CorrectionPlayerControllerTest.EventBus
+import static jmedyn4j.EventBusSingletonHolder.*
 
 class RealtimePlayerInWorldAppState extends AbstractAppState {
 	private final static ConcurrentLinkedQueue actionQueue = new ConcurrentLinkedQueue();
@@ -41,9 +41,9 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
-		if (newtrlv != null) {
-			clientSidePlayerControl.performCorrection(newtrlv)
-			newtrlv=null
+		if (correctionTrlv != null) {
+			clientSidePlayerControl.performCorrection(correctionTrlv)
+			correctionTrlv=null
 		}
 		
 		Map action = actionQueue.poll()
@@ -87,7 +87,7 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 		
 		mat.setColor("Color", ColorRGBA.Red)
-		mat.getAdditionalRenderState().setWireframe(true);
+		//mat.getAdditionalRenderState().setWireframe(true);
 		
 		Geometry cylGeom = new Geometry("Cylinder", new Cylinder(20, 50, 0.3f, 1.8f))
 		cylGeom.setMaterial(mat)
@@ -104,17 +104,16 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 		Dyn4JPlayerControl playerControl = new Dyn4JPlayerControl(0.3, 1.80, 90)
 		capsuleNode.addControl(playerControl)
 		dyn4JAppState.add(capsuleNode)
+		//println "created player control $playerControl"
 		return playerControl
 	}
 	
-	Map newtrlv
+	Map correctionTrlv
 	
 	@Handler
 	void handleAction(Map action) {
-		if (action.actionType == "localMovement") actionQueue.add(action);
-		if (action.actionType == "correct") {
-			 newtrlv=action.trlv
-		}
+		if (action.actionType == "localMovement") {actionQueue.add(action)}
+		else if (action.actionType == "correct") correctionTrlv=action.trlv
+ 
 	}
-
 }
