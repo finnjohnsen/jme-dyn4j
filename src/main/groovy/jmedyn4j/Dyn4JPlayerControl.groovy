@@ -28,9 +28,9 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private Double weight
 
 	/* When correction is recieved: */
-	private final static Double rubberBandThreshold = 0.8;
-	private final static Double neglishableCorrectionThreshold = 0.1;
-	private final static Double neglishableCorrectionPercentage = 10
+	private final static Double rubberBandThreshold = 2.0;
+	private final static Double neglishableCorrectionThreshold = 0.15;
+	private final static Double neglishableCorrectionPercentage = 20
 	/* End Correction */	
 	
 	/* The body. */
@@ -169,7 +169,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private updateJump(float tpf) {
 		if (jump) {
 			jump=false
-			mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
+			if (Math.abs(mainBody.getLinearVelocity().y) < 0.1) mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
 		}
 	}
 	

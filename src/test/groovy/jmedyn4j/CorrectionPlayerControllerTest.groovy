@@ -77,6 +77,7 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		flyCam.setMoveSpeed(15f)
 
 		
+		
 		Node realtimeWorldNode = new Node("realtimeWorldNode")
 		rootNode.attachChild(realtimeWorldNode)
 		realtimeDyn4JAppState = new Dyn4JAppState()
@@ -84,7 +85,7 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		RealtimePlayerInWorldAppState realtimePlayerAppState = new RealtimePlayerInWorldAppState(realtimeDyn4JAppState:realtimeDyn4JAppState, worldNode:realtimeWorldNode, assetManager:assetManager)
 		EventBus.subscribe(realtimePlayerAppState)
 		stateManager.attach(realtimePlayerAppState)
-		createWorld(realtimeDyn4JAppState, realtimeWorldNode)
+		
 		
 		
 		Node correctionWorldNode = new Node("correctionWorldNode")
@@ -94,6 +95,10 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		CorrectionWorldAppState correctionAppState = new CorrectionWorldAppState(correctionDyn4JAppState:correctionDyn4JAppState, worldNode:correctionWorldNode, assetManager:assetManager)
 		EventBus.subscribe(correctionAppState)
 		stateManager.attach(correctionAppState)
+		
+		
+		
+		createWorld(realtimeDyn4JAppState, realtimeWorldNode)
 		createWorld(correctionDyn4JAppState, correctionWorldNode)
 		
 		cam.setLocation(new Vector3f(0f, 0f, 35f));
@@ -133,12 +138,11 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 
 	void createWorld(Dyn4JAppState dyn4JAppState, Node worldNode) {
 		createFloor(dyn4JAppState, worldNode);
-		//(1..40).each {
-		//	createBox(new Vector2f(new Float((Math.random()*15)-7), new Float(-8)), dyn4JAppState, worldNode)
-		//}
+		Random generator = new Random(13)
+		(1..10).each {
+			createBox(new Vector2f(new Float((generator.nextFloat()*15)-7), new Float(-7)), dyn4JAppState, worldNode)
+		}
 	}
-
-
 
 	Double cageSize = 10
 
@@ -169,7 +173,7 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		boxGeom.setLocalTranslation(location.x, location.y, 0f)
 		boxGeom.setMaterial(mat)
 		worldNode.attachChild(boxGeom)
-		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.NORMAL, 100, 0.8, 0)
+		Dyn4JShapeControl physics = new Dyn4JShapeControl(new Rectangle(new Float(boxSize*2), new Float(boxSize*2)), MassType.INFINITE, 100, 0.8, 0)
 		boxGeom.addControl(physics)
 		dyn4JAppState.add(boxGeom)
 	}
