@@ -21,6 +21,8 @@ import com.jme3.scene.shape.Cylinder
 
 
 class CorrectionWorldAppState extends AbstractAppState {
+	private final static Float tpf = 1/60;
+	
 	private final static ConcurrentLinkedQueue clientSideActionBacklog = new ConcurrentLinkedQueue();
 	private final static ConcurrentLinkedQueue serverActionBacklog = new ConcurrentLinkedQueue();
 	AssetManager assetManager
@@ -36,89 +38,73 @@ class CorrectionWorldAppState extends AbstractAppState {
 		assert assetManager
 	}
 	
-	Date lastCorrectionTime
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
 		Map serverAction
 		synchronized(this) {
+			//always process 'join' immediately
 			if (serverActionBacklog.peek()?.action == "Join") {
 				Map joinAction = serverActionBacklog.poll()
-				latestProcessedAction = joinAction.cnt
 				correctionPlayer = initPlayer(new Vector2f(0f, 0f), correctionDyn4JAppState, worldNode, assetManager)
 				return;
 			}
 			
-			if (serverActionBacklog.peek() == null || clientSideActionBacklog.peek() == null) return
+			if (serverActionBacklog.peek() == null || clientSideActionBacklog.peek() == null) return //nothing to do.
+			
 			while(clientSideActionBacklog.peek() != null) {
 				Map clientAction = clientSideActionBacklog.peek()
 				if (clientAction.cnt < serverActionBacklog.peek().cnt) { 
-					clientSideActionBacklog.poll()
+					clientSideActionBacklog.poll() // weed out client messages older than the serverAction.
 				} else break;
 			}
-			if (clientSideActionBacklog.peek() == null || clientSideActionBacklog.size() < 2) return
+			
+			if (clientSideActionBacklog.peek() == null || clientSideActionBacklog.size() < 2) return // we want at least 1 extra clientAction to append to the serverAction.
+			
 			serverAction = serverActionBacklog.poll()
-			if (serverAction.cnt < clientSideActionBacklog.peek().cnt) return
+			if (serverAction.cnt < clientSideActionBacklog.peek().cnt) return // if the serverAction is already processed/simulated. Perhaps we could increase accuracy by being able to re-run once again. Will see.
 		}
 		
-		if (serverAction == null) {
-			throw new IllegalStateException("no server actiond")
-		}
+		if (serverAction == null) throw new IllegalStateException("no server action at this point is such a nasty bug that I don't wanna live anymore")
+		
 		
 		Map lastCorrection
-		//println ""
-		//println "*** Correcting ***"
 		Long start = new Date().getTime()
 		if (["Jump", "Right", "StopRight", "Left", "StopLeft"].contains(serverAction.action)) {
 			lastCorrection = processActions(serverAction)
 		} 
 
 		if (lastCorrection!=null) {
-			
 			Double timeDiffMillis = new Date().getTime() - lastCorrection.time.getTime()
 			int ticks = Math.round(timeDiffMillis/(tpf*1000))
-			//println "trying to get to now, ticks: $ticks, move: ${correctionPlayer.getMove()}"
 			if (ticks>1) {
 				(1..ticks-1).each {
-					correctionDyn4JAppState.update(tpf)
+					correctionDyn4JAppState.updatePhysics(tpf)
 				}
-				correctionDyn4JAppState.update(tpf)
-			} else correctionDyn4JAppState.update(tpf)
+				correctionDyn4JAppState.updatePhysics(tpf)
+			} else correctionDyn4JAppState.updatePhysics(tpf)
 			
 			EventBus.publish([actionType:"correct", trlv:correctionPlayer.getTrlv()])
 		}
-		//println "*** Correcting Finished ***" 
-		//println ""
 	}
 	
-	private Long latestProcessedAction = 0
-	private final Float tpf = 1/60;
-	//Long correctionBatch = 0
 	private Map processActions(Map serverAction) {
-		//println "serverAction: $serverAction"
 		correctionPlayer.setMove("StopLeft")
 		correctionPlayer.setMove("StopRight")
 		Map clientAction = clientSideActionBacklog.poll()
 		Map previousClientAction
 		while (clientAction != null) {
-			//latestProcessedAction = clientAction.cnt
-			//println "${clientAction.cnt}. ClientAction : $clientAction"
 			if (clientAction.cnt < serverAction.cnt) { // dont do any stepping with these.
-				//correctionPlayer.setMove(clientAction.action)
-				//println "${clientAction.cnt}. PreCorr set to ${clientAction.action} "
 			} else if (clientAction.cnt == serverAction.cnt) { //the actual correction
 				correctionPlayer.setTrlv(serverAction.trlv)
 				correctionPlayer.setMove(serverAction.action)
-				//println "${clientAction.cnt}. Correction set to ${serverAction.action}"
 				previousClientAction = clientAction
 			} else if (clientAction.cnt > serverAction.cnt) { //after the actual correction
 				Double timeDiffMillis = clientAction.time.getTime() - previousClientAction.time.getTime()
-				int ticks = Math.round(timeDiffMillis/(1/60*1000))
-				//println "Running ${ticks} ticks which is ${correctionPlayer.getMove()}"
+				int ticks = Math.round(timeDiffMillis/(tpf*1000))
 				(1..ticks).each {
-					correctionDyn4JAppState.update(tpf)
+					correctionDyn4JAppState.updatePhysics(tpf)
 				}
-				//println "${clientAction.cnt}. Post-Correction setting to ${clientAction.action}"
 				correctionPlayer.setMove(clientAction.action)
 				previousClientAction=clientAction
 			}
@@ -136,11 +122,7 @@ class CorrectionWorldAppState extends AbstractAppState {
 			clientSideActionBacklog.add(action)
 		} else if (action.actionType == "serverMovement")  {
 			synchronized(this) {
-				if (action.cnt <= latestProcessedAction) {
-					//println "${new Date()}. discarding server message ${action.cnt}"
-				} else {
-					serverActionBacklog.add action
-				}
+				serverActionBacklog.add action
 			}
 		} 
 	}

@@ -47,8 +47,6 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		settings.setTitle("JME-DYN4J-TEST")
 		main.setSettings(settings)
 		main.start()
-
-
 	}
 	
 	@Override
@@ -91,19 +89,15 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		
 		Node correctionWorldNode = new Node("correctionWorldNode")
 		correctionWorldNode.setLocalTranslation(0f, 0f, 0f)
-		rootNode.attachChild(correctionWorldNode)
+		//rootNode.attachChild(correctionWorldNode)
 		Dyn4JAppState correctionDyn4JAppState = new Dyn4JAppState()
-		//stateManager.attach(correctionDyn4JAppState)
 		CorrectionWorldAppState correctionAppState = new CorrectionWorldAppState(correctionDyn4JAppState:correctionDyn4JAppState, worldNode:correctionWorldNode, assetManager:assetManager)
 		EventBus.subscribe(correctionAppState)
 		stateManager.attach(correctionAppState)
 		createWorld(correctionDyn4JAppState, correctionWorldNode)
 		
-		
-		
 		cam.setLocation(new Vector3f(0f, 0f, 35f));
 		initKeys()
-		//initPlayer(new Vector2f(0f, 0f), dyn4JAppState)
 
 		new Timer().schedule({
 			/*
@@ -112,7 +106,6 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 			//"sh /home/finn/src/jme-dyn4j/etc/mv-srv.sh".execute()
 		} as TimerTask, 500)
 	}
-	
 
 	void initKeys() {
 		inputManager.addMapping("Join",  new KeyTrigger(KeyInput.KEY_P));
@@ -120,9 +113,7 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT));
 		inputManager.addMapping("Jump", new KeyTrigger(KeyInput.KEY_SPACE));
 		inputManager.addListener(actionListener,"Left", "Right", "Jump", "Join");
-		
 	}
-	
 	
 	private ActionListener actionListener = new ActionListener() {
 		public void onAction(String name, boolean keyPressed, float tpf) {

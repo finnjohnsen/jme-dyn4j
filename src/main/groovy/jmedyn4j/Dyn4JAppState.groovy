@@ -44,6 +44,21 @@ class Dyn4JAppState extends AbstractAppState {
 	@Override
 	public void update(float tpf) {
 		super.update(tpf)
+		updatePhysics(tpf)
+		updateDraw(tpf)
+	}
+	
+	public void updateDraw(float tpf) {
+		synchronized(spatials) {
+			spatials.asList().each { Spatial spatial ->
+				IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
+				if (ctl == null) { spatials.remove(spatial); return; } //evict nodes which have their Dyn4JShapeControl removed
+				ctl.updateDraw(tpf)
+			}
+		}
+	}
+	
+	public void updatePhysics(float tpf) {
 		synchronized(spatials) {
 			spatials.asList().each { Spatial spatial ->
 				IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
@@ -52,13 +67,6 @@ class Dyn4JAppState extends AbstractAppState {
 			}
 		}
 		world.update(tpf, Integer.MAX_VALUE)
-		synchronized(spatials) {
-			spatials.asList().each { Spatial spatial ->
-				IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
-				if (ctl == null) { spatials.remove(spatial); return; } //evict nodes which have their Dyn4JShapeControl removed
-				ctl.updateDraw(tpf)
-			}
-		}
 	}
 
 	@Override

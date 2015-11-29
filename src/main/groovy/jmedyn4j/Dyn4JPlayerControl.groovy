@@ -105,7 +105,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		return [tr:[x:tr.x.round(4), y:tr.y.round(4)], lv:[x:lv.x.round(4), y:lv.y.round(4)]]
 	}
 	
-	private final static Double rubberBandThreshold = 3.0;
+	private final static Double rubberBandThreshold = 0.8;
 	private final static Double neglishableCorrectionThreshold = 0.01;
 	
 	void performCorrection(Map newTrlv) {
@@ -115,27 +115,27 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		Double yDiff = mainBody.getTransform().getTranslationY() - newTrlv.tr.y
 		
 		if (Math.abs(xDiff) > rubberBandThreshold) {
-			println "rubber band"
+			println "X rubber band"
 			Double newTrX = newTrlv.tr.x
 			mainBody.getTransform().setTranslationX(newTrX)
 		} else if (Math.abs(xDiff) > neglishableCorrectionThreshold){
-			//println "neglishable"
+			//println "X 10% corr"
 		 	Double newTrX = mainBody.getTransform().getTranslationX() + (xDiff / 10)
 			mainBody.getTransform().setTranslationX(newTrX)
 		} else {
-			//println "too simular, ignored"
+			//println "X too simular, ignored"
 		}
 		
 		if (Math.abs(yDiff) > rubberBandThreshold) {
-			println "rubber band"
+			println "Y rubber band"
 			Double newTrY = newTrlv.tr.y
 			mainBody.getTransform().setTranslationY(newTrY)
 		} else if (Math.abs(yDiff) > neglishableCorrectionThreshold){
-			//println "neglishable"
+			//println "Y 10% corr"
 		 	Double newTrY = mainBody.getTransform().getTranslationY() + (yDiff / 10)
 			mainBody.getTransform().setTranslationY(newTrY)
 		} else {
-			//println "too simular, ignored"
+			//println "Y too simular, ignored"
 		}
 	}
 	
