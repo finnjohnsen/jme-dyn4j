@@ -16,6 +16,7 @@ import org.dyn4j.dynamics.World
 class Dyn4JAppState extends AbstractAppState {
 	private World world
 	private Set<Spatial> spatials = new HashSet<Spatial>();
+	
 	void add(Spatial spatial) {
 		if (world == null) world = new World()
 		if (spatial.getControl(IDyn4JControl.class) == null) throw new IllegalArgumentException("Cannot handle a node which isnt a ${Dyn4JShapeControl.getClass().getSimpleName()}")
@@ -24,6 +25,13 @@ class Dyn4JAppState extends AbstractAppState {
 			 IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
 			 ctl.addToWorld(world)
 		}
+	}
+	
+	void remove(Spatial spatial) {
+		if (spatial == null || spatial.getControl(IDyn4JControl.class) == null) return
+		spatials.remove(spatials)
+		IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
+		ctl.removeFromWorld()
 	}
 	
 	@Override

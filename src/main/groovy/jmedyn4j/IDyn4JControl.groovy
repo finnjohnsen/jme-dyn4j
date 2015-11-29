@@ -8,4 +8,5 @@ interface IDyn4JControl {
 	void updatePhysics(float tpf)
 	void updateDraw(float tpf)
 	void addToWorld(World world)
+	void removeFromWorld(World world)
 }

@@ -85,6 +85,13 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	}
 	
 	@Override
+	void removeFromWorld(World world) {
+		world.removeJoint(joint)
+		world.removeBody(mainBody)	
+		world.removeBody(controllerbody)
+	}
+	
+	@Override
 	public void setSpatial(Spatial spatial) {
 		this.spatial = spatial
 		mainBody.translate(new Double(spatial.getLocalTranslation().x), new Double(spatial.getLocalTranslation().y))
