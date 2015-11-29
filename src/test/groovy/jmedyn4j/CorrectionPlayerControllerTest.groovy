@@ -154,7 +154,7 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		floorGeom.setLocalTranslation(0f, -8f, 0f)
 		worldNode.attachChild(floorGeom)
 
-		floorGeom.addControl(new Dyn4JShapeControl(new Rectangle(width*2, thickness*2), MassType.INFINITE, 0, 1))
+		floorGeom.addControl(new Dyn4JShapeControl(new Rectangle(width*2, thickness*2), MassType.INFINITE, 0, 1, 0))
 		dyn4JAppState.add(floorGeom)
 	}
 

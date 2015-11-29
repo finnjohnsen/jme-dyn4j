@@ -23,22 +23,38 @@ import com.jme3.scene.Spatial
 import com.jme3.scene.control.Control
 
 class Dyn4JPlayerControl implements Control, IDyn4JControl {
-	private Spatial spatial
-	private Long weight = 80
+	private final Double walkSpeed
+	private final Double jumpForceFactor
+	private Double weight
+
+	/* When correction is recieved: */
+	private final static Double rubberBandThreshold = 0.8;
+	private final static Double neglishableCorrectionThreshold = 0.1;
+	private final static Double neglishableCorrectionPercentage = 10
+	/* End Correction */	
 	
-	private Body mainBody
-	private Body controllerbody
-	private MotorJoint joint
-	Dyn4JPlayerControl(Double width=0.3, Double height=1.8, Long weight=80) {
-		this.weight=weight
+	/* The body. */
+	private Spatial spatial
+	private final Body mainBody
+	private final Body controllerbody
+	private final MotorJoint joint
+	
+	/* Movement state */
+	private Boolean walkRight = false
+	private Boolean walkLeft = false
+	private Boolean jump = false
+	
+	Dyn4JPlayerControl(Double width=0.3, Double height=1.8, Long weight=80, Double walkSpeed=4, Double jumpForceFactor=3.0, Double friction=1, Double resitution = 0) {
+		this.weight = weight;
+		this.walkSpeed = walkSpeed
+		this.jumpForceFactor = jumpForceFactor
+		
 		AbstractShape shape = new Capsule(width, height)
-		
-		
 		mainBody = new Body()
 		BodyFixture bodyFixture = new BodyFixture(shape)
 		bodyFixture.setDensity(weight);
-		bodyFixture.setFriction(1) //no slipperiness
-		bodyFixture.setRestitution(0) //no bouncyness
+		bodyFixture.setFriction(friction) //1=no slipperiness
+		bodyFixture.setRestitution(resitution) //0=no bouncyness
 		mainBody.addFixture(bodyFixture)
 		mainBody.setMass(MassType.NORMAL)
 		mainBody.setAutoSleepingEnabled(false)
@@ -47,9 +63,8 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		BodyFixture controllerFixture = new BodyFixture(shape)
 		controllerFixture.setSensor(true)
 		controllerFixture.setDensity(weight);
-		controllerFixture.setDensity(weight);
-		controllerFixture.setFriction(1) //no slipperiness
-		controllerFixture.setRestitution(0) //no bouncyness
+		controllerFixture.setFriction(friction) //1=no slipperiness
+		controllerFixture.setRestitution(resitution) //1=no slipperiness
 		controllerbody.addFixture(controllerFixture);
 		controllerbody.setMass(MassType.INFINITE)
 		
@@ -104,10 +119,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		Vector2 lv = mainBody.getLinearVelocity()
 		return [tr:[x:tr.x.round(4), y:tr.y.round(4)], lv:[x:lv.x.round(4), y:lv.y.round(4)]]
 	}
-	
-	private final static Double rubberBandThreshold = 0.8;
-	private final static Double neglishableCorrectionThreshold = 0.01;
-	
+
 	void performCorrection(Map newTrlv) {
 		//println "PerformCorrection"
 		
@@ -120,7 +132,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 			mainBody.getTransform().setTranslationX(newTrX)
 		} else if (Math.abs(xDiff) > neglishableCorrectionThreshold){
 			//println "X 10% corr"
-		 	Double newTrX = mainBody.getTransform().getTranslationX() + (xDiff / 10)
+		 	Double newTrX = mainBody.getTransform().getTranslationX() + (xDiff / neglishableCorrectionPercentage)
 			mainBody.getTransform().setTranslationX(newTrX)
 		} else {
 			//println "X too simular, ignored"
@@ -132,7 +144,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 			mainBody.getTransform().setTranslationY(newTrY)
 		} else if (Math.abs(yDiff) > neglishableCorrectionThreshold){
 			//println "Y 10% corr"
-		 	Double newTrY = mainBody.getTransform().getTranslationY() + (yDiff / 10)
+		 	Double newTrY = mainBody.getTransform().getTranslationY() + (yDiff / neglishableCorrectionPercentage)
 			mainBody.getTransform().setTranslationY(newTrY)
 		} else {
 			//println "Y too simular, ignored"
@@ -153,8 +165,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 				new Float(vector2.x),
 				new Float(vector2.y), 0f)
 	}
-
-	Double jumpForceFactor = 9.0
+		
 	private updateJump(float tpf) {
 		if (jump) {
 			jump=false
@@ -163,24 +174,17 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	}
 	
 	Boolean canJump() {
-		
 		(mainBody.getInContactBodies(false).size() != 0)
 	}
-
-	Double walkForceFactor = 2//aka walk speed
 	
 	private void updateWalkDirection(float tpf) {
 		if (walkRight) {
-			mainBody.setLinearVelocity(4, mainBody.getLinearVelocity().y) //hard turn
+			mainBody.setLinearVelocity(walkSpeed, mainBody.getLinearVelocity().y) //hard turn
 		} else if (walkLeft) {
-			mainBody.setLinearVelocity(-4, mainBody.getLinearVelocity().y)//hard turn
+			mainBody.setLinearVelocity(-walkSpeed, mainBody.getLinearVelocity().y)//hard turn
 		} else { //stop, let physics (friction etc) take care of it.
 		}
 	}
-	
-	private Boolean walkRight = false
-	private Boolean walkLeft = false
-	private Boolean jump = false
 	
 	void doMove(String move) {
 		switch (move) {
