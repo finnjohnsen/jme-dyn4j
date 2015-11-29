@@ -70,9 +70,9 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 			} else {
 				if (action.action == "Join") {
 					if (joined==true){
-						 println "already joined"
+						 //println "already joined"
 					} else {
-						println "joining"
+						//println "joining"
 						joined=true
 						clientSidePlayerControl=initPlayer(new Vector2f(0f, 0f), realtimeDyn4JAppState, worldNode, assetManager)
 						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])

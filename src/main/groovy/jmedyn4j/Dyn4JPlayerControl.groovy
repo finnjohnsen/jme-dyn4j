@@ -23,7 +23,6 @@ import com.jme3.scene.Spatial
 import com.jme3.scene.control.Control
 
 class Dyn4JPlayerControl implements Control, IDyn4JControl {
-	Boolean debugging = false
 	private Spatial spatial
 	private Long weight = 80
 	
@@ -110,29 +109,35 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private final static Double neglishableCorrectionThreshold = 0.01;
 	
 	void performCorrection(Map newTrlv) {
-		println "performCorrection"
+		//println "PerformCorrection"
 		
 		Double xDiff = mainBody.getTransform().getTranslationX() - newTrlv.tr.x 
 		Double yDiff = mainBody.getTransform().getTranslationY() - newTrlv.tr.y
 		
 		if (Math.abs(xDiff) > rubberBandThreshold) {
+			println "rubber band"
 			Double newTrX = newTrlv.tr.x
 			mainBody.getTransform().setTranslationX(newTrX)
 		} else if (Math.abs(xDiff) > neglishableCorrectionThreshold){
+			//println "neglishable"
 		 	Double newTrX = mainBody.getTransform().getTranslationX() + (xDiff / 10)
 			mainBody.getTransform().setTranslationX(newTrX)
-		} else {}
+		} else {
+			//println "too simular, ignored"
+		}
 		
 		if (Math.abs(yDiff) > rubberBandThreshold) {
+			println "rubber band"
 			Double newTrY = newTrlv.tr.y
 			mainBody.getTransform().setTranslationY(newTrY)
 		} else if (Math.abs(yDiff) > neglishableCorrectionThreshold){
+			//println "neglishable"
 		 	Double newTrY = mainBody.getTransform().getTranslationY() + (yDiff / 10)
 			mainBody.getTransform().setTranslationY(newTrY)
-		} else {}
+		} else {
+			//println "too simular, ignored"
+		}
 	}
-	
-	
 	
 	void setTrlv(Map trlv) {
 		Transform tr = new Transform()
@@ -144,7 +149,6 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	
 	private updateLocation() {
 		Vector2 vector2 = mainBody.getTransform().getTranslation()
-		if (debugging) println "translation $vector2"
 		this.spatial.setLocalTranslation(
 				new Float(vector2.x),
 				new Float(vector2.y), 0f)
@@ -154,15 +158,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private updateJump(float tpf) {
 		if (jump) {
 			jump=false
-			if (canJump()) {
-				if (debugging)  println "JUMPING"
-				mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
-			} else {
-				if (debugging) {
-					  println "CANT JUMP"
-					  println "from ${mainBody.getTransform().getTranslation()}"
-				}
-			}
+			mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
 		}
 	}
 	
@@ -187,7 +183,6 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private Boolean jump = false
 	
 	void doMove(String move) {
-		if (debugging) println "doMove $move"
 		switch (move) {
 			case ("Join"):  break; /*ignore*/
 			case ("Right"): moveRight(); break;
@@ -200,7 +195,6 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	}
 	
 	void setMove(String move) {
-		if (debugging) println "setMove $move"
 		switch (move) {
 			case ("Join"):  break; /*ignore*/
 			case ("NoMove"): walkRight=false;walkLeft=false; break;
@@ -221,12 +215,10 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	}
 	
 	void moveRight() {
-		if (debugging) println "moveRight()"
 		walkRight=true
 	}
 	
 	void moveLeft() {
-		if (debugging) println "moveLeft()"
 		walkLeft=true
 	}
 	

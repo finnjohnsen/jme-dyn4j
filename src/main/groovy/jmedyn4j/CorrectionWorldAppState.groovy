@@ -46,8 +46,6 @@ class CorrectionWorldAppState extends AbstractAppState {
 				Map joinAction = serverActionBacklog.poll()
 				latestProcessedAction = joinAction.cnt
 				correctionPlayer = initPlayer(new Vector2f(0f, 0f), correctionDyn4JAppState, worldNode, assetManager)
-				correctionPlayer.debugging=true
-				//correctionDyn4JAppState.update(0)
 				return;
 			}
 			
@@ -60,11 +58,16 @@ class CorrectionWorldAppState extends AbstractAppState {
 			}
 			if (clientSideActionBacklog.peek() == null || clientSideActionBacklog.size() < 2) return
 			serverAction = serverActionBacklog.poll()
+			if (serverAction.cnt < clientSideActionBacklog.peek().cnt) return
+		}
+		
+		if (serverAction == null) {
+			throw new IllegalStateException("no server actiond")
 		}
 		
 		Map lastCorrection
-		println ""
-		println "*** Correcting ***"
+		//println ""
+		//println "*** Correcting ***"
 		Long start = new Date().getTime()
 		if (["Jump", "Right", "StopRight", "Left", "StopLeft"].contains(serverAction.action)) {
 			lastCorrection = processActions(serverAction)
@@ -74,53 +77,48 @@ class CorrectionWorldAppState extends AbstractAppState {
 			
 			Double timeDiffMillis = new Date().getTime() - lastCorrection.time.getTime()
 			int ticks = Math.round(timeDiffMillis/(tpf*1000))
-			println "trying to get to now, ticks: $ticks, move: ${correctionPlayer.getMove()}"
+			//println "trying to get to now, ticks: $ticks, move: ${correctionPlayer.getMove()}"
 			if (ticks>1) {
 				(1..ticks-1).each {
 					correctionDyn4JAppState.update(tpf)
 				}
 				correctionDyn4JAppState.update(tpf)
 			} else correctionDyn4JAppState.update(tpf)
-//			Float updateTPF = new Float((now.getTime() - lastTime.getTime())/1000f)
-//			println "FF to now ${updateTPF}"
-			//println "FF Complete ${correctionPlayer.getMove()} for $updateTPF, from ${correctionPlayer.getTrlv()}"
-//			correctionDyn4JAppState.update(1/60)
-//			Map trlv = correctionPlayer.getTrlv()
-			//EventBus.publish([actionType:"correct", trlv:trlv])
+			
+			EventBus.publish([actionType:"correct", trlv:correctionPlayer.getTrlv()])
 		}
-		println "*** Correcting Finished ***"
-		println ""
+		//println "*** Correcting Finished ***" 
+		//println ""
 	}
 	
 	private Long latestProcessedAction = 0
 	private final Float tpf = 1/60;
 	//Long correctionBatch = 0
 	private Map processActions(Map serverAction) {
+		//println "serverAction: $serverAction"
 		correctionPlayer.setMove("StopLeft")
 		correctionPlayer.setMove("StopRight")
 		Map clientAction = clientSideActionBacklog.poll()
 		Map previousClientAction
 		while (clientAction != null) {
-			latestProcessedAction = clientAction.cnt
-			println "${clientAction.cnt}. ClientAction : $clientAction"
+			//latestProcessedAction = clientAction.cnt
+			//println "${clientAction.cnt}. ClientAction : $clientAction"
 			if (clientAction.cnt < serverAction.cnt) { // dont do any stepping with these.
 				//correctionPlayer.setMove(clientAction.action)
 				//println "${clientAction.cnt}. PreCorr set to ${clientAction.action} "
 			} else if (clientAction.cnt == serverAction.cnt) { //the actual correction
 				correctionPlayer.setTrlv(serverAction.trlv)
 				correctionPlayer.setMove(serverAction.action)
-				println "${clientAction.cnt}. Correction set to ${serverAction.action}"
+				//println "${clientAction.cnt}. Correction set to ${serverAction.action}"
 				previousClientAction = clientAction
 			} else if (clientAction.cnt > serverAction.cnt) { //after the actual correction
-				println "Running ${previousClientAction.physTick} ticks which is ${correctionPlayer.getMove()}"
-				
 				Double timeDiffMillis = clientAction.time.getTime() - previousClientAction.time.getTime()
 				int ticks = Math.round(timeDiffMillis/(1/60*1000))
+				//println "Running ${ticks} ticks which is ${correctionPlayer.getMove()}"
 				(1..ticks).each {
 					correctionDyn4JAppState.update(tpf)
 				}
-
-				println "${clientAction.cnt}. Post-Correction setting to ${clientAction.action}"
+				//println "${clientAction.cnt}. Post-Correction setting to ${clientAction.action}"
 				correctionPlayer.setMove(clientAction.action)
 				previousClientAction=clientAction
 			}
@@ -132,11 +130,9 @@ class CorrectionWorldAppState extends AbstractAppState {
 	
 
 	
-	Map currAction
 	@Handler
 	void handleAction(Map action) {
 		if (action.actionType == "executedLocalMovement") {
-			currAction=action
 			clientSideActionBacklog.add(action)
 		} else if (action.actionType == "serverMovement")  {
 			synchronized(this) {
@@ -146,12 +142,7 @@ class CorrectionWorldAppState extends AbstractAppState {
 					serverActionBacklog.add action
 				}
 			}
-		} else if (action.actionType == "physTick") {
-			if (currAction==null) return
-			if (currAction.physTick) {
-				currAction.physTick+=1
-			} else currAction.physTick=1
-		}
+		} 
 	}
 	
 	private Dyn4JPlayerControl initPlayer(Vector2f location, Dyn4JAppState dyn4JAppState, Node worldNode, AssetManager assetManager) {

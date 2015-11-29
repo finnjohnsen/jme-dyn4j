@@ -44,7 +44,7 @@ class ServerMovementSimulator {
 	@Handler
 	void handleAction(Map action) {
 		if (action.actionType == "executedLocalMovement") {
-			println "                                                                                                  ${action.cnt} 0.${action.time.getTime()-lastLocal.getTime()} tpf, then ${action.action} ${action.trlv}"	
+			//println "                                                                                                  ${action.cnt} 0.${action.time.getTime()-lastLocal.getTime()} tpf, then ${action.action} ${action.trlv}"	
 			serverBacklogDelayed.add(action)
 			lastLocal = action.time
 		}

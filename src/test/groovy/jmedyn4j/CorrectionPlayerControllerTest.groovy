@@ -46,7 +46,6 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		settings.setVSync(true)
 		settings.setTitle("JME-DYN4J-TEST")
 		main.setSettings(settings)
-		println "starting"
 		main.start()
 
 
@@ -83,7 +82,6 @@ class CorrectionPlayerControllerTest extends SimpleApplication {
 		Node realtimeWorldNode = new Node("realtimeWorldNode")
 		rootNode.attachChild(realtimeWorldNode)
 		realtimeDyn4JAppState = new Dyn4JAppState()
-		realtimeDyn4JAppState.broadcastPhysicsTicks=true
 		stateManager.attach(realtimeDyn4JAppState)
 		RealtimePlayerInWorldAppState realtimePlayerAppState = new RealtimePlayerInWorldAppState(realtimeDyn4JAppState:realtimeDyn4JAppState, worldNode:realtimeWorldNode, assetManager:assetManager)
 		EventBus.subscribe(realtimePlayerAppState)
