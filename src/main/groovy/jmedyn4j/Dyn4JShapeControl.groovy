@@ -49,14 +49,14 @@ class Dyn4JShapeControl implements Control, IDyn4JControl {
 		 
 	 @Override
 	 void addToWorld(World world) {
-		 world = world
+		 this.world = world
 		 world.addBody(body)
 	 }
 	 
 	 @Override
 	 void removeFromWorld(World world) {
-		 world.removeBody(body)
-		 world=null
+		 this.world.removeBody(body)
+		 this.world=null
 	 }
 	
 	// more = more bouncy

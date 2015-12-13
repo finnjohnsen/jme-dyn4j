@@ -31,7 +31,7 @@ class Dyn4JAppState extends AbstractAppState {
 		if (spatial == null || spatial.getControl(IDyn4JControl.class) == null) return
 		spatials.remove(spatials)
 		IDyn4JControl ctl = spatial.getControl(IDyn4JControl.class)
-		ctl.removeFromWorld()
+		ctl.removeFromWorld(world)
 	}
 	
 	@Override
