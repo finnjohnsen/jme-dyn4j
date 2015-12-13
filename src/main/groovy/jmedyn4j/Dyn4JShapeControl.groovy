@@ -29,6 +29,7 @@ class Dyn4JShapeControl implements Control, IDyn4JControl {
 	private Spatial spatial
 	protected Body body
 	BodyFixture fixture
+	private World world
 	
 	Dyn4JShapeControl(AbstractShape shape,
 		 massType,
@@ -48,12 +49,14 @@ class Dyn4JShapeControl implements Control, IDyn4JControl {
 		 
 	 @Override
 	 void addToWorld(World world) {
+		 world = world
 		 world.addBody(body)
 	 }
 	 
 	 @Override
 	 void removeFromWorld(World world) {
 		 world.removeBody(body)
+		 world=null
 	 }
 	
 	// more = more bouncy
