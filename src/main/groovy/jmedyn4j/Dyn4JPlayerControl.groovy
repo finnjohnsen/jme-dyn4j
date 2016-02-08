@@ -186,7 +186,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 			jump=false
 			//if (Math.abs(mainBody.getLinearVelocity().y) < 0.1) mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
 			try {
-				if (canJump()) {
+				if (isOnGround()) {
 					mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
 			   }
 			} catch(all) {
@@ -196,7 +196,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		}
 	}
 	
-	Boolean canJump() {
+	Boolean isOnGround() {
 		Boolean somethingBelow = false
 			
 		Vector2 from = mainBody.getTransform().getTranslation()
@@ -205,7 +205,6 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		
 		if (world.raycast(ray, 0.9, true, true, raycastResults)) {
 			somethingBelow = true
-			
 			/* Only every other ray works. So we cast two. No idea why */
 			Ray ray2 = new Ray(from, Vector2.Y_AXIS.negate())
 			world.raycast(ray2, 0.9, true, true, raycastResults)
@@ -213,11 +212,14 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		return somethingBelow
 	}
 	
+	
 	private void updateWalkDirection(float tpf) {
 		if (walkRight) {
-			mainBody.setLinearVelocity(walkSpeed, mainBody.getLinearVelocity().y) //hard turn
+			if (!isOnGround() && !runningJump) mainBody.setLinearVelocity(new Double(walkSpeed/3), mainBody.getLinearVelocity().y) //hard turn 
+			else mainBody.setLinearVelocity(new Double(walkSpeed), mainBody.getLinearVelocity().y) //hard turn
 		} else if (walkLeft) {
-			mainBody.setLinearVelocity(-walkSpeed, mainBody.getLinearVelocity().y)//hard turn
+			if (!isOnGround() && !runningJump) mainBody.setLinearVelocity(new Double(-walkSpeed/3), mainBody.getLinearVelocity().y)//hard turn
+			else mainBody.setLinearVelocity(new Double(-walkSpeed), mainBody.getLinearVelocity().y)//hard turn
 		} else { //stop, let physics (friction etc) take care of it.
 		}
 	}
@@ -237,12 +239,12 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	void setMove(String move) {
 		switch (move) {
 			case ("Join"):  break; /*ignore*/
-			case ("NoMove"): walkRight=false;walkLeft=false; break;
-			case ("Right"): walkRight=true; break;
-			case ("Left"): walkLeft=true; break;
-			case ("StopLeft"): walkLeft=false; break;
-			case ("StopRight"): walkRight=false; break;
-			case ("Jump"): jump=true;break;
+			case ("NoMove"): stopMoveLeft();stopMoveRight(); break;
+			case ("Right"): moveRight(); break;
+			case ("Left"): moveLeft(); break;
+			case ("StopLeft"): stopMoveLeft(); break;
+			case ("StopRight"): stopMoveRight(); break;
+			case ("Jump"): jump();break;
 			default: println "No idea what to do about $move";
 		}
 	}
@@ -255,23 +257,29 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	}
 	
 	void moveRight() {
-		walkRight=true
+		runningJump = false
+		walkRight = true
 	}
 	
 	void moveLeft() {
-		walkLeft=true
+		runningJump = false
+		walkLeft = true
 	}
 	
 	void stopMoveRight() {
+		runningJump = false
 		walkRight=false
 	}
 	
 	void stopMoveLeft() {
+		runningJump = false
 		walkLeft=false
 	}
 	
+	Boolean runningJump = false
 	void jump() {
-		jump=true
+		jump = true
+		runningJump = ( isOnGround() && (walkLeft || walkRight) )
 	}
 	
 	@Override

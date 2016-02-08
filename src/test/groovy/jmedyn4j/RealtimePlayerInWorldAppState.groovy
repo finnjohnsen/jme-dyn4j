@@ -62,7 +62,7 @@ class RealtimePlayerInWorldAppState extends AbstractAppState {
 					clientSidePlayerControl.stopMoveLeft()
 					EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 				} else if (action.action=="Jump") {
-					if (clientSidePlayerControl.canJump()) {
+					if (clientSidePlayerControl.isOnGround()) {
 						clientSidePlayerControl.jump()
 						EventBus.publishAsync([actionType:"executedLocalMovement", action:action.action, time:new Date(), trlv:clientSidePlayerControl.getTrlv(), cnt:++executedLocalMovementCounter])
 					}
