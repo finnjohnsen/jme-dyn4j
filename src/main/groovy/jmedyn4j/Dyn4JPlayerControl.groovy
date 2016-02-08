@@ -1,20 +1,21 @@
 package jmedyn4j
 
+import groovy.util.logging.Slf4j
+
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
-import org.dyn4j.dynamics.Force
+import org.dyn4j.dynamics.RaycastResult
 import org.dyn4j.dynamics.World
-import org.dyn4j.dynamics.joint.Joint
 import org.dyn4j.dynamics.joint.MotorJoint
 import org.dyn4j.geometry.AbstractShape
 import org.dyn4j.geometry.Capsule
 import org.dyn4j.geometry.MassType
+import org.dyn4j.geometry.Ray
 import org.dyn4j.geometry.Transform
 import org.dyn4j.geometry.Vector2
 
 import com.jme3.export.JmeExporter
 import com.jme3.export.JmeImporter
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion
 import com.jme3.math.Vector3f
 import com.jme3.renderer.RenderManager
@@ -22,6 +23,7 @@ import com.jme3.renderer.ViewPort
 import com.jme3.scene.Spatial
 import com.jme3.scene.control.Control
 
+@Slf4j
 class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private final Double walkSpeed
 	private final Double jumpForceFactor
@@ -44,10 +46,13 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private Boolean walkLeft = false
 	private Boolean jump = false
 	
+	Double height
+	
 	Dyn4JPlayerControl(Double width=0.3, Double height=1.8, Long weight=80, Double walkSpeed=4, Double jumpForceFactor=3.0, Double friction=1, Double resitution = 0) {
 		this.weight = weight;
 		this.walkSpeed = walkSpeed
 		this.jumpForceFactor = jumpForceFactor
+		this.height = height
 		
 		AbstractShape shape = new Capsule(width, height)
 		mainBody = new Body()
@@ -77,8 +82,10 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		joint.setCollisionAllowed(false)
 	}
 	
+	World world
 	@Override 
 	void addToWorld(World world) {
+		this.world=world
 		world.addBody(mainBody)
 		world.addBody(controllerbody)
 		world.addJoint(joint)
@@ -89,6 +96,7 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 		world.removeJoint(joint)
 		world.removeBody(mainBody)	
 		world.removeBody(controllerbody)
+		world=null
 	}
 	
 	@Override
@@ -176,12 +184,33 @@ class Dyn4JPlayerControl implements Control, IDyn4JControl {
 	private updateJump(float tpf) {
 		if (jump) {
 			jump=false
-			if (Math.abs(mainBody.getLinearVelocity().y) < 0.1) mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
+			//if (Math.abs(mainBody.getLinearVelocity().y) < 0.1) mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
+			try {
+				if (canJump()) {
+					mainBody.applyImpulse(new Vector2(0, weight*jumpForceFactor));
+			   }
+			} catch(all) {
+				log.error "Jump crashed ", all
+			}
+			
 		}
 	}
 	
 	Boolean canJump() {
-		(mainBody.getInContactBodies(false).size() != 0)
+		Boolean somethingBelow = false
+			
+		Vector2 from = mainBody.getTransform().getTranslation()
+		Ray ray = new Ray(from, Vector2.Y_AXIS.negate())
+		List<RaycastResult> raycastResults = new ArrayList<>();
+		
+		if (world.raycast(ray, 0.9, true, true, raycastResults)) {
+			somethingBelow = true
+			
+			/* Only every other ray works. So we cast two. No idea why */
+			Ray ray2 = new Ray(from, Vector2.Y_AXIS.negate())
+			world.raycast(ray2, 0.9, true, true, raycastResults)
+		}
+		return somethingBelow
 	}
 	
 	private void updateWalkDirection(float tpf) {
