@@ -13,7 +13,7 @@ repositories {
 def jmonkeyengine_version = '3.1.0-SNAPSHOT'
 dependencies {
 	compile 'org.codehaus.groovy:groovy-all:2.4.3'
-	compile 'org.dyn4j:dyn4j:3.2.0'
+	compile 'org.dyn4j:dyn4j:3.2.1'
 //	compile "com.jme3:jme3-jogg:$jmonkeyengine_version"
 	compile "com.jme3:jme3-desktop:$jmonkeyengine_version"
 	compile "com.jme3:jme3-lwjgl:$jmonkeyengine_version"
